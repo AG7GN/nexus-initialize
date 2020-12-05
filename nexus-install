@@ -382,12 +382,10 @@ do
 	# Flrig
 	rm -rf $HOME/.flrig-$SIDE
 	echo >&2 "Initializing Flrig $SIDE"
-	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE
+	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE &
    PID_=$!
-   echo "flrig PID is $PID_"
-   sleep 3
+   sleep 1
    WID=$(xdotool search --pid $PID_)
-   echo "flrig WID is $WID"
    xdotool windowclose $WID >/dev/null 2>&1
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
