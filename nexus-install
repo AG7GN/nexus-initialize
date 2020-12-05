@@ -341,7 +341,7 @@ do
       sleep 2
    done
    pkill -SIGTERM fldigi
-   FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title &quot;Flmsg ($SIDE radio)&quot;"
+   FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title \"Flmsg ($SIDE radio)\""
 	sed -i 
 	-e "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
    -e "s/<ALERTDEVICE>.*<\/ALERTDEVICE>/<ALERTDEVICE>system-audio-playback<\/ALERTDEVICE>/" \
