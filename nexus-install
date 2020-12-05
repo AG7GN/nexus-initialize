@@ -367,7 +367,7 @@ do
    -e "s/<XMLLOG_PORT>.*<\/XMLLOG_PORT>/XMLLOG_PORT>${XMLLOG_PORT[$SIDE]}<\/XMLLOG_PORT>/" \
    -e "s/<FSQLOWERCASE>.*<\/FSQLOWERCASE>/<FSQLOWERCASE>1<\/FSQLOWERCASE>/" \
    -e "s/<OPEN_FLMSG_PRINT>.*<\/OPEN_FLMSG_PRINT>/<OPEN_FLMSG_PRINT>0<\/OPEN_FLMSG_PRINT>/" \
-   -e "s/<FLMSG_PATHNAME>.*<\/FLMSG_PATHNAME>/<FLMSG_PATHNAME>$FLMSG_STRING<\/FLMSG_PATHNAME>/" \
+   -e "s|<FLMSG_PATHNAME>.*</FLMSG_PATHNAME>|<FLMSG_PATHNAME>$FLMSG_STRING</FLMSG_PATHNAME>|" \
    $HOME/.fldigi-$SIDE/fldigi_def.xml
    
    if [[ $SIDE == "right" ]]
@@ -384,8 +384,10 @@ do
 	echo >&2 "Initializing Flrig $SIDE"
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE
    PID_=$!
+   echo "flrig PID is $PID_"
    sleep 3
    WID=$(xdotool search --pid $PID_)
+   echo "flrig WID is $WID"
    xdotool windowclose $WID >/dev/null 2>&1
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
