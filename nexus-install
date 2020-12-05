@@ -281,7 +281,7 @@ for DESKTOP in /usr/local/share/applications/*.template
 do
 	sed -e "s/_LEFT_RADIO_/left radio/g" \
 	 	-e "s/_RIGHT_RADIO_/right radio/g" \
-		$DESKTOP > sudo tee ${DESKTOP%%.*}.desktop
+		$DESKTOP | sudo tee ${DESKTOP%%.*}.desktop
 done
 
 ####### Install nexus-rmsgw
@@ -384,7 +384,7 @@ do
 	echo >&2 "Initializing Flrig $SIDE"
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE &
    PID_=$!
-   sleep 1
+   sleep 2
    WID=$(xdotool search --pid $PID_)
    xdotool windowclose $WID >/dev/null 2>&1
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
