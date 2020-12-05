@@ -228,6 +228,7 @@ declare -r FALSE=1
 SRC_DIR="/usr/local/src/nexus"
 sudo mkdir -p $SRC_DIR
 sudo chown -f -R $USER:$USER $SRC_DIR
+sudo mkdir -p /usr/local/share/applications
 TITLE="Nexus Initializer - version $VERSION"
 
 ####### AUDIO Setup ###########
@@ -242,7 +243,7 @@ TITLE="Nexus Initializer - version $VERSION"
 #then
 #	sudo sed -i -e "s/$/ $CMD_STRING/" $CONFIG_
 #fi
-# Adding Fe-Pi dtoverlay if not present
+echo "Adding Fe-Pi dtoverlay if needed"
 CONFIG_="/boot/config.txt"
 if ! grep -q "^dtoverlay=fe-pi-audio" $CONFIG_
 then
@@ -252,7 +253,6 @@ fi
 
 sudo cp -f nexus-initialize/usr/share/alsa/pulse-alsa.conf /usr/share/alsa/
 [[ -s /etc/asound.conf ]] && sudo mv /etc/asound.conf /etc/asound.conf.previous
-sudo cp -f nexus-initialize/etc/asound.conf /etc/
 [[ -s $HOME/.config/pulse/default.pa ]] && rm -f $HOME/.config/pulse/default.pa
 cp -f /etc/pulse/default.pa $HOME/.config/pulse/
 cat nexus-initialize/config/pulse/default.pa.append >> $HOME/.config/pulse/default.pa
@@ -377,7 +377,7 @@ do
 	rm -rf $HOME/.flrig-$SIDE
 	echo >&2 "Initializing Flrig $SIDE"
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE
-   sleep 2
+   sleep 4
    pkill -SIGTERM flrig	
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
@@ -397,7 +397,41 @@ do
    done
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
 	echo >&2 "Done."
-	
+
+	# Flamp
+	echo >&2 "Initializing Flamp $SIDE"
+   flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
+   PID_=$!
+   sleep 1
+   WID=$(xdotool search --pid $PID_)
+   xdotool windowclose $WID >/dev/null 2>&1
+   sleep 2
+   for WID in $(xdotool search --name "flamp")
+   do
+      xdotool windowclose $WID >/dev/null 2>&1
+   done
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
+   		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
+   		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
+	echo >&2 "Done."
+
+	# Flarq
+	echo >&2 "Initializing Flamp $SIDE"
+   flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
+   PID_=$!
+   sleep 1
+   WID=$(xdotool search --pid $PID_)
+   xdotool windowclose $WID >/dev/null 2>&1
+   sleep 2
+   for WID in $(xdotool search --name "flamp")
+   do
+      xdotool windowclose $WID >/dev/null 2>&1
+   done
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
+   		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
+   		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
+	echo >&2 "Done."
+
 done
 
 
