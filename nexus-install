@@ -342,21 +342,10 @@ do
    done
    pkill -SIGTERM fldigi
    FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title \"Flmsg ($SIDE radio)\""
-	sed -i -e \ "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
-	$HOME/.fldigi-$SIDE/fldigi_def.xml
-   echo "sed one done"
-   
-   sed -i -e \
-   "s/<ALERTDEVICE>.*<\/ALERTDEVICE>/<ALERTDEVICE>system-audio-playback<\/ALERTDEVICE>/" \
+	sed -i -e "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
+   -e "s/<ALERTDEVICE>.*<\/ALERTDEVICE>/<ALERTDEVICE>system-audio-playback<\/ALERTDEVICE>/" \
    -e "s/<ALERTINDEX>.*<\/ALERTINDEX>/<ALERTINDEX>10<\/ALERTINDEX>/" \
-   $HOME/.fldigi-$SIDE/fldigi_def.xml
-   echo "sed quarter done"
-   
-   sed -i -e \   "s/<ENABLE_AUDIO_ALERTS>.*<\/ENABLE_AUDIO_ALERTS>/<ENABLE_AUDIO_ALERTS>0<\/ENABLE_AUDIO_ALERTS>/" \
-	$HOME/.fldigi-$SIDE/fldigi_def.xml
-   echo "sed ENABLE_AUDIO_ALERTS done"
-   
-   sed -i \
+	-e "s/<ENABLE_AUDIO_ALERTS>.*<\/ENABLE_AUDIO_ALERTS>/<ENABLE_AUDIO_ALERTS>0<\/ENABLE_AUDIO_ALERTS>/" \
    -e "s/<PORTINDEVICE>.*<\/PORTINDEVICE>/<PORTINDEVICE>pulse<\/PORTINDEVICE>/" \
    -e "s/<PORTININDEX>.*<\/PORTININDEX>/<PORTININDEX>-1<\/PORTININDEX>/" \
    -e "s/<PORTOUTDEVICE>.*<\/PORTOUTDEVICE>/<PORTOUTDEVICE><\/PORTOUTDEVICE>/" \
@@ -364,11 +353,7 @@ do
    -e "s/<ENABLE_GPIO>.*<\/ENABLE_GPIO>/<ENABLE_GPIO>${GPIO_STATE[$SIDE]}<\/ENABLE_GPIO>/" \
    -e "s/<GPIO_STATE>.*<\/GPIO_STATE>/<GPIO_STATE>${GPIO_STATE[$SIDE]}<\/GPIO_STATE>/" \
    -e "s/<XMLRPC_PORT>.*<\/XMLRPC_PORT>/<XMLRPC_PORT>${XML_PORT[$SIDE]}<\/XMLRPC_PORT>/" \
-   $HOME/.fldigi-$SIDE/fldigi_def.xml
-   echo "sed half done"
-   
-   sed -i -e \
-"s/<KISS_IO_PORT>.*<\/KISS_IO_PORT>/<KISS_IO_PORT>${KISS_IO_PORT[$SIDE]}<\/KISS_IO_PORT>/" \
+-e "s/<KISS_IO_PORT>.*<\/KISS_IO_PORT>/<KISS_IO_PORT>${KISS_IO_PORT[$SIDE]}<\/KISS_IO_PORT>/" \
    -e "s/<KISS_OUT_PORT>.*<\/KISS_OUT_PORT>/<KISS_OUT_PORT>${KISS_OUT_PORT[$SIDE]}<\/KISS_OUT_PORT>/" \
    -e "s/<ARQ_PORT>.*<\/ARQ_PORT>/<ARQ_PORT>${ARQ_PORT[$SIDE]}<\/ARQ_PORT>/" \
    -e "s/<FLRIG_IP_PORT>.*<\/FLRIG_IP_PORT>/FLRIG_IP_PORT>${FLRIG_PORT[$SIDE]}<\/FLRIG_IP_PORT>/" \
