@@ -1,0 +1,403 @@
+#!/usr/bin/env bash
+#================================================================
+# HEADER
+#================================================================
+#% SYNOPSIS
+#+   ${SCRIPT_NAME} [-hv] 
+#+   ${SCRIPT_NAME} [-d DIRECTORY] [-l FILE] [-f FILE] [APP[,APP]...]
+#%
+#% DESCRIPTION
+#%   This script updates the Raspberry Pi image designed for use on the Nexus DR-X.
+#%   It can update the Raspbian OS as well as select ham applications.
+#%
+#% OPTIONS
+#%    -h, --help              Print this help
+#%    -v, --version           Print script information
+#%    -l, --list              List of applications this script has the ability to
+#%                            install.
+#%    -s, --self-check        Scripts checks for a new version of itself when run and
+#%                            automatically updates itself if an update is available.
+#%    -f, --force-reinstall   Re-install an application even if it's up to date
+#% 
+#% COMMANDS 
+#%    APP(s)                  Zero or more applications (comma separated) to install,
+#%                            or udpate if already installed.
+#%                            If no APPs are supplied, the script runs in GUI
+#%                            mode and presents a user interface in which the user
+#%                            can select one or more APPs for installation or
+#%                            upgrade.
+#%                                
+#% EXAMPLES
+#%    Run the script in GUI mode and run the self-checker:
+#%
+#%      ${SCRIPT_NAME} -s
+#%
+#%    Run the script from the command line and install or update fldigi and flmsg:
+#%
+#%      ${SCRIPT_NAME} fldigi,flmsg  
+#%    
+#%    Run the script from the command line and force a reinstall of fldigi and flmsg:
+#%
+#%      ${SCRIPT_NAME} -f fldigi,flmsg  
+#%    
+#================================================================
+#- IMPLEMENTATION
+#-    version         ${SCRIPT_NAME} 2.0.11
+#-    author          Steve Magnuson, AG7GN
+#-    license         CC-BY-SA Creative Commons License
+#-    script_id       0
+#-
+#================================================================
+#  HISTORY
+#     20201120 : Steve Magnuson : Script creation
+# 
+#================================================================
+#  DEBUG OPTION
+#    set -n  # Uncomment to check your syntax, without execution.
+#    set -x  # Uncomment to debug this shell script
+#
+#================================================================
+# END_OF_HEADER
+#================================================================
+
+SYNTAX=false
+DEBUG=false
+Optnum=$#
+
+#============================
+#  FUNCTIONS
+#============================
+
+function TrapCleanup() {
+  [[ -d "${TMPDIR}" ]] && rm -rf "${TMPDIR}/"
+  exit 0
+}
+
+
+function SafeExit() {
+  # Exit with arg1
+  EXIT_CODE=${1:-0}
+  AdjustSwap  # Restore swap if needed
+  # Delete temp files, if any
+  [[ -d "${TMPDIR}" ]] && rm -rf "${TMPDIR}/"
+  trap - INT TERM EXIT
+  exit $EXIT_CODE
+}
+
+
+function ScriptInfo() { 
+	HEAD_FILTER="^#-"
+	[[ "$1" = "usage" ]] && HEAD_FILTER="^#+"
+	[[ "$1" = "full" ]] && HEAD_FILTER="^#[%+]"
+	[[ "$1" = "version" ]] && HEAD_FILTER="^#-"
+	head -${SCRIPT_HEADSIZE:-99} ${0} | grep -e "${HEAD_FILTER}" | \
+	sed -e "s/${HEAD_FILTER}//g" \
+	    -e "s/\${SCRIPT_NAME}/${SCRIPT_NAME}/g" \
+	    -e "s/\${SPEED}/${SPEED}/g" \
+	    -e "s/\${DEFAULT_PORTSTRING}/${DEFAULT_PORTSTRING}/g"
+}
+
+
+function Usage() { 
+	printf "Usage: "
+	ScriptInfo usage
+	SafeExit 0
+}
+
+
+function Die () {
+	echo "${*}"
+	SafeExit 1
+}
+
+
+function AptError () {
+   echo
+   echo
+   echo
+   echo >&2 "ERROR while running '$1'.  Exiting."
+   echo
+   echo
+   echo
+   SafeExit 1
+}
+
+
+function CheckInternet() {
+	# Check for Internet connectivity
+	if ! ping -q -w 1 -c 1 github.com > /dev/null 2>&1
+	then
+   	yad --center --title="$TITLE" --info --borders=30 \
+      	 --text="<b>No Internet connection found.  Check your Internet connection \
+and run this script again.</b>" --buttons-layout=center \
+	       --button=Close:0
+   SafeExit 1
+fi
+
+}
+
+
+function LocalRepoUpdate() {
+
+	# Checks if a local repository is set up and if not clones it. If there is a local
+	# repo, then do a 'git pull' to see if there are updates. If no updates, return $FALSE 
+	# otherwise return $TRUE.  
+	#
+	# arg1: Name of app to install/update
+	# arg2: git URL for app
+	
+	UP_TO_DATE=$FALSE
+	REQUEST="$1"
+	URL="$2"
+	GIT_DIR="$(echo ${URL##*/} | sed -e 's/\.git$//')"
+	cd $SRC_DIR
+	echo "============= $REQUEST install/update requested ========"
+	# See if local git repository exists. Create it ('git clone') if not
+	if ! [[ -s $SRC_DIR/$GIT_DIR/.git/HEAD ]]
+	then
+		git clone $URL || { echo >&2 "======= git clone $URL failed ========"; SafeExit 1; }
+	else  # See if local repo is up to date
+		cd $GIT_DIR
+		if git pull | tee /dev/stderr | grep -q "^Already"
+		then
+			echo "============= $REQUEST up to date ============="
+			UP_TO_DATE=$TRUE
+		fi
+	fi
+	cd $SRC_DIR
+	[[ $UP_TO_DATE == $FALSE ]] && return $TRUE || return $FALSE
+}
+
+
+function NexusLocalRepoUpdate() {
+
+	# Checks if a local Nexus repository is set up and if not clones it. If there 
+	# is a local repo, then do a 'git pull' to see if there are updates. If no updates,
+	# return $FALSE 
+	# otherwise return $TRUE.  If there are updates, look for shell script named 
+	# 'nexus-install' in repo and run it if present and executable.
+	#
+	# arg1: Name of app to install/update
+	# arg2: git URL for app
+	
+	if (LocalRepoUpdate "$1" "$2") || [[ $FORCE == $TRUE ]]
+	then
+		cd $SRC_DIR
+   	if [[ -x ${2##*/}/nexus-install ]]
+   	then
+   		${2##*/}/nexus-install || Die "Failed to install/update $1"
+   	  	echo "======== $1 installed/updated ========"
+			cd $SRC_DIR
+      	return $TRUE
+		fi
+		return $TRUE
+	else		
+		cd $SRC_DIR
+		return $FALSE
+	fi
+}
+
+
+#============================
+#  FILES AND VARIABLES
+#============================
+
+# Set Temp Directory
+# -----------------------------------
+# Create temp directory with three random numbers and the process ID
+# in the name.  This directory is removed automatically at exit.
+# -----------------------------------
+TMPDIR="/tmp/${SCRIPT_NAME}.$RANDOM.$RANDOM.$RANDOM.$$"
+(umask 077 && mkdir "${TMPDIR}") || {
+  Die "Could not create temporary directory! Exiting."
+}
+
+  #== general variables ==#
+SCRIPT_NAME="$(basename ${0})" # scriptname without path
+SCRIPT_DIR="$( cd $(dirname "$0") && pwd )" # script directory
+SCRIPT_FULLPATH="${SCRIPT_DIR}/${SCRIPT_NAME}"
+SCRIPT_ID="$(ScriptInfo | grep script_id | tr -s ' ' | cut -d' ' -f3)"
+SCRIPT_HEADSIZE=$(grep -sn "^# END_OF_HEADER" ${0} | head -1 | cut -f1 -d:)
+VERSION="$(ScriptInfo version | grep version | tr -s ' ' | cut -d' ' -f 4)" 
+
+GITHUB_URL="https://github.com"
+NEXUS_UPDATER_GIT_URL="$GITHUB_URL/AG7GN/nexus-updater"
+REBOOT="NO"
+declare -r TRUE=0
+declare -r FALSE=1
+SRC_DIR="/usr/local/src/nexus"
+sudo mkdir -p $SRC_DIR
+sudo chown -f -R $USER:$USER $SRC_DIR
+TITLE="Nexus Initializer - version $VERSION"
+
+####### AUDIO Setup ###########
+
+# Append sound directives to the end of cmdline.txt to restore ALSA sound
+# interface definitions using the old method (needed for compatibility with Fldigi
+# alert sounds as well as to retain the ability to switch between HDMI and 
+# Analog from the Desktop).
+#CONFIG_="/boot/cmdline.txt"
+#CMD_STRING="snd-bcm2835.enable_compat_alsa=1 snd-bcm2835.enable_hdmi=0 snd-bcm2835.enable_headphones=0"
+#if ! grep -q $CMD_STRING $CONFIG_ 2>/dev/null
+#then
+#	sudo sed -i -e "s/$/ $CMD_STRING/" $CONFIG_
+#fi
+# Adding Fe-Pi dtoverlay if not present
+CONFIG_="/boot/config.txt"
+if ! grep -q "^dtoverlay=fe-pi-audio" $CONFIG_
+then
+	echo "# Enable Fe Pi audio card"  | sudo tee --append $CONFIG_
+	echo "dtoverlay=fe-pi-audio" | sudo tee --append $CONFIG_
+fi
+
+sudo cp -f nexus-initialize/usr/share/alsa/pulse-alsa.conf /usr/share/alsa/
+[[ -s /etc/asound.conf ]] && sudo mv /etc/asound.conf /etc/asound.conf.previous
+sudo cp -f nexus-initialize/etc/asound.conf /etc/
+[[ -s $HOME/.config/pulse/default.pa ]] && rm -f $HOME/.config/pulse/default.pa
+cp -f /etc/pulse/default.pa $HOME/.config/pulse/
+cat nexus-initialize/config/pulse/default.pa.append >> $HOME/.config/pulse/default.pa
+cp -f nexus-initialize/asoundrc $HOME/.asoundrc
+
+####### Check for Real Time Clock dtoverlay #########
+
+# Check for RTC dtoverlay
+echo "Adding RTC dtoverlay if needed"
+if ! grep -q "^dtoverlay=i2c-rtc,ds3231" $CONFIG_
+then
+	echo "# Enable ds3231 Real Time Clock (RTC)"  | sudo tee --append $CONFIG_
+	echo "dtoverlay=i2c-rtc,ds3231" | sudo tee --append $CONFIG_
+fi
+
+####### Install nexus-updater
+NexusLocalRepoUpdate nexus-updater $NEXUS_UPDATER_GIT_URL
+command -v nexus-updater.sh || Die "Nexus Updater installation failed."
+
+####### Install fldigi, flmsg, flrig, direwolf, nexus-rmsgw
+nexus-updater.sh fldigi,flmsg,flrig,flamp,direwolf
+
+####### Install nexus-utilities and set up desktops
+nexus-updater.sh nexus-utilities
+for DESKTOP in /usr/local/share/nexus/*.template
+do
+	sudo sed -e "s/_LEFT_RADIO_/left radio/g" \
+				-e "s/_RIGHT_RADIO_/right radio/g" \
+				$DESKTOP > ${DESKTOP%%.*}.desktop
+done
+
+####### Install nexus-rmsgw
+#nexus-updater.sh nexus-rmsgw
+
+####### Set up Fldigi to use PulseAudio with Fe-Pi sound card.
+
+rm -rf $HOME/.nbems
+rm -rf $HOME/.fltk
+
+declare -A GPIO_STATE
+GPIO_STATE[left]=8192
+GPIO_STATE[right]=16
+
+declare -A KISS_IO_PORT
+KISS_IO_PORT[left]=7342
+KISS_IO_PORT[right]=7344
+
+declare -A KISS_OUT_PORT
+KISS_OUT_PORT[left]=7343
+KISS_OUT_PORT[right]=7345
+
+declare -A ARQ_PORT
+ARQ_PORT[left]=7322
+ARQ_PORT[right]=7323
+
+declare -A XML_PORT
+XML_PORT[left]=7362
+XML_PORT[right]=7363
+
+declare -A FLRIG_PORT
+FLRIG_PORT[left]=12345
+FLRIG_PORT[right]=12346
+
+declare -A XMLLOG_PORT
+XMLLOG_PORT[left]=8421
+XMLLOG_PORT[right]=8422
+
+declare -A FLMSG_WEB_PORT
+FLMSG_WEB_PORT[left]=8080
+FLMSG_WEB_PORT[right]=8090
+
+for SIDE in left right
+do
+
+	# Fldigi
+	echo >&2 "Initializing Fldigi $SIDE"
+   rm -rf $HOME/.fldigi-$SIDE
+   rm -rf $HOME/.nbems-$SIDE
+   fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
+   PID_=$!
+   sleep 2
+   while pgrep fldigi >/dev/null 2>&1
+   do
+      WID=$(xdotool search --pid $PID_)
+      [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
+      sleep 2
+   done
+   pkill -SIGTERM fldigi
+   FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title &quot;Flmsg ($SIDE radio)&quot;"
+	sed -i 
+	-e "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
+   -e "s/<ALERTDEVICE>.*<\/ALERTDEVICE>/<ALERTDEVICE>system-audio-playback<\/ALERTDEVICE>/" \
+   -e "s/<ALERTINDEX>.*<\/ALERTINDEX>/<ALERTINDEX>10<\/ALERTINDEX>/" \
+   -e "s/<ENABLE_AUDIO_ALERTS>.*<\/ENABLE_AUDIO_ALERTS>/<ENABLE_AUDIO_ALERTS>0<\/ENABLE_AUDIO_ALERTS>/" \
+   -e "s/<PORTINDEVICE>.*<\/PORTINDEVICE>/<PORTINDEVICE>pulse<\/PORTINDEVICE>/" \
+   -e "s/<PORTININDEX>.*<\/PORTININDEX>/<PORTININDEX>-1<\/PORTININDEX>/" \
+   -e "s/<PORTOUTDEVICE>.*<\/PORTOUTDEVICE>/<PORTOUTDEVICE><\/PORTOUTDEVICE>/" \
+   -e "s/<PORTOUTINDEX>.*<\/PORTOUTINDEX>/<PORTOUTINDEX>-1<\/PORTOUTINDEX>/" \
+   -e "s/<ENABLE_GPIO>.*<\/ENABLE_GPIO>/<ENABLE_GPIO>${GPIO_STATE[$SIDE]}<\/ENABLE_GPIO>/" \
+   -e "s/<GPIO_STATE>.*<\/GPIO_STATE>/<GPIO_STATE>${GPIO_STATE[$SIDE]}<\/GPIO_STATE>/" \
+   -e "s/<XMLRPC_PORT>.*<\/XMLRPC_PORT>/<XMLRPC_PORT>${XML_PORT[$SIDE]}<\/XMLRPC_PORT>/" \
+   -e "s/<KISS_IO_PORT>.*<\/KISS_IO_PORT>/<KISS_IO_PORT>${KISS_IO_PORT[$SIDE]}<\/KISS_IO_PORT>/" \
+   -e "s/<KISS_OUT_PORT>.*<\/KISS_OUT_PORT>/<KISS_OUT_PORT>${KISS_OUT_PORT[$SIDE]}<\/KISS_OUT_PORT>/" \
+   -e "s/<ARQ_PORT>.*<\/ARQ_PORT>/<ARQ_PORT>${ARQ_PORT[$SIDE]}<\/ARQ_PORT>/" \
+   -e "s/<FLRIG_IP_PORT>.*<\/FLRIG_IP_PORT>/FLRIG_IP_PORT>${FLRIG_PORT[$SIDE]}<\/FLRIG_IP_PORT>/" \
+   -e "s/<XMLLOG_PORT>.*<\/XMLLOG_PORT>/XMLLOG_PORT>${XMLLOG_PORT[$SIDE]}<\/XMLLOG_PORT>/" \
+   -e "s/<FSQLOWERCASE>.*<\/FSQLOWERCASE>/<FSQLOWERCASE>1<\/FSQLOWERCASE>/" \
+   -e "s/<OPEN_FLMSG_PRINT>.*<\/OPEN_FLMSG_PRINT>/<OPEN_FLMSG_PRINT>0<\/OPEN_FLMSG_PRINT>/" \
+   -e "s/<FLMSG_PATHNAME>.*<\/FLMSG_PATHNAME>/<FLMSG_PATHNAME>$FLMSG_STRING<\/FLMSG_PATHNAME>/" \
+   $HOME/.fldigi-$SIDE/fldigi_def.xml
+   
+   if [[ $SIDE == "right" ]]
+   then
+   	sed -i \
+   	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>1<\/REVERSEAUDIO>/" \
+	   -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>1<\/REVERSERXAUDIO>/" \
+	   $HOME/.fldigi-$SIDE/fldigi_def.xml	
+   fi   
+	echo >&2 "Done."
+	
+	# Flrig
+	rm -rf $HOME/.flrig-$SIDE
+	echo >&2 "Initializing Flrig $SIDE"
+	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE
+   sleep 2
+   pkill -SIGTERM flrig	
+   sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
+   echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
+	echo >&2 "Done."
+	
+	# Flmsg
+	echo >&2 "Initializing Flmsg $SIDE"
+   flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
+   PID_=$!
+   sleep 1
+   WID=$(xdotool search --pid $PID_)
+   xdotool windowclose $WID >/dev/null 2>&1
+   sleep 2
+   for WID in $(xdotool search --name "flmsg")
+   do
+      xdotool windowclose $WID >/dev/null 2>&1
+   done
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
+	echo >&2 "Done."
+	
+done
+
+
