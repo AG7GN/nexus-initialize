@@ -281,7 +281,7 @@ for DESKTOP in /usr/local/share/applications/*.template
 do
 	sed -e "s/_LEFT_RADIO_/left radio/g" \
 	 	-e "s/_RIGHT_RADIO_/right radio/g" \
-		$DESKTOP | sudo tee ${DESKTOP%%.*}.desktop
+		$DESKTOP | sudo tee ${DESKTOP%%.*}.desktop 1>/dev/null
 done
 
 ####### Install nexus-rmsgw
@@ -336,7 +336,7 @@ do
    sleep 2
    while pgrep fldigi >/dev/null 2>&1
    do
-      WID=$(xdotool search --pid $PID_)
+      WID=$(xdotool search --pid $PID_ 2>/dev/null)
       [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
       sleep 2
    done
@@ -385,8 +385,9 @@ do
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE &
    PID_=$!
    sleep 2
-   WID=$(xdotool search --pid $PID_)
+   WID=$(xdotool search --pid $PID_ 2>/dev/null)
    xdotool windowclose $WID >/dev/null 2>&1
+   pkill -SIGTERM flrig
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
 	echo >&2 "Done."
@@ -396,13 +397,14 @@ do
    flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_=$!
    sleep 1
-   WID=$(xdotool search --pid $PID_)
+   WID=$(xdotool search --pid $PID_ 2>/dev/null)
    xdotool windowclose $WID >/dev/null 2>&1
    sleep 2
    for WID in $(xdotool search --name "flmsg")
    do
       xdotool windowclose $WID >/dev/null 2>&1
    done
+   pkill -SIGTERM flmsg
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
 	echo >&2 "Done."
 
@@ -418,6 +420,7 @@ do
    do
       xdotool windowclose $WID >/dev/null 2>&1
    done
+   pkill -SIGTERM flamp
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
    		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
    		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
@@ -435,6 +438,7 @@ do
    do
       xdotool windowclose $WID >/dev/null 2>&1
    done
+   pkill -SIGTERM flarq
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
    		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
    		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
