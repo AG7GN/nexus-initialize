@@ -277,7 +277,7 @@ nexus-updater.sh fldigi,flmsg,flrig,flamp,direwolf
 
 ####### Install nexus-utilities and set up desktops
 nexus-updater.sh nexus-utilities
-for DESKTOP in /usr/local/applications/*.template
+for DESKTOP in /usr/local/share/applications/*.template
 do
 	sudo sed -e "s/_LEFT_RADIO_/left radio/g" \
 				-e "s/_RIGHT_RADIO_/right radio/g" \
