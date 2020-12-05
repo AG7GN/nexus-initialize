@@ -353,6 +353,10 @@ do
    echo "sed quarter done"
    
    sed -i -e \   "s/<ENABLE_AUDIO_ALERTS>.*<\/ENABLE_AUDIO_ALERTS>/<ENABLE_AUDIO_ALERTS>0<\/ENABLE_AUDIO_ALERTS>/" \
+	$HOME/.fldigi-$SIDE/fldigi_def.xml
+   echo "sed ENABLE_AUDIO_ALERTS done"
+   
+   sed -i \
    -e "s/<PORTINDEVICE>.*<\/PORTINDEVICE>/<PORTINDEVICE>pulse<\/PORTINDEVICE>/" \
    -e "s/<PORTININDEX>.*<\/PORTININDEX>/<PORTININDEX>-1<\/PORTININDEX>/" \
    -e "s/<PORTOUTDEVICE>.*<\/PORTOUTDEVICE>/<PORTOUTDEVICE><\/PORTOUTDEVICE>/" \
