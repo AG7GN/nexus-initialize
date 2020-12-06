@@ -401,7 +401,6 @@ do
    	sleep 2
       xdotool windowclose $WID >/dev/null 2>&1
    done
-   pkill -SIGTERM flmsg
    [[ -s $HOME/.nbems-$SIDE/FLMSG.prefs ]] && echo "FLMSG.prefs exists" || echo "FLMSG.prefs does NOT exist"
    sleep 1
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
