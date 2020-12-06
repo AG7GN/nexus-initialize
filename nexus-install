@@ -391,6 +391,7 @@ do
 	echo >&2 "Initializing Flmsg $SIDE"
    flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_=$!
+   sleep 2
    WID=$(xdotool search --pid $PID_ 2>/dev/null)
    echo "Flmsg WID = $WID"
    xdotool windowclose $WID >/dev/null 2>&1
