@@ -252,11 +252,12 @@ then
 fi
 
 sudo cp -f nexus-initialize/usr/share/alsa/pulse-alsa.conf /usr/share/alsa/
-[[ -s /etc/asound.conf ]] && sudo mv /etc/asound.conf /etc/asound.conf.previous
+[[ -s /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
+cp -f nexus-initialize/etc/asound.conf /etc/asound.conf
 [[ -s $HOME/.config/pulse/default.pa ]] && rm -f $HOME/.config/pulse/default.pa
-cp -f /etc/pulse/default.pa $HOME/.config/pulse/
-cat nexus-initialize/config/pulse/default.pa.append >> $HOME/.config/pulse/default.pa
-cp -f nexus-initialize/asoundrc $HOME/.asoundrc
+sudo cp -f /etc/pulse/default.pa /etc/pulse/default.pa.previous
+cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa
+systemctl --user restart pulseaudio
 
 ####### Check for Real Time Clock dtoverlay #########
 
@@ -345,6 +346,7 @@ do
 	sed -i -e "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
    -e "s/<ALERTDEVICE>.*<\/ALERTDEVICE>/<ALERTDEVICE>system-audio-playback<\/ALERTDEVICE>/" \
    -e "s/<ALERTINDEX>.*<\/ALERTINDEX>/<ALERTINDEX>10<\/ALERTINDEX>/" \
+	-e "s/<AUDIOIO>.*<\/AUDIOIO>/<AUDIOIO>2<\/AUDIOIO>/" \
 	-e "s/<ENABLE_AUDIO_ALERTS>.*<\/ENABLE_AUDIO_ALERTS>/<ENABLE_AUDIO_ALERTS>0<\/ENABLE_AUDIO_ALERTS>/" \
    -e "s/<PORTINDEVICE>.*<\/PORTINDEVICE>/<PORTINDEVICE>pulse<\/PORTINDEVICE>/" \
    -e "s/<PORTININDEX>.*<\/PORTININDEX>/<PORTININDEX>-1<\/PORTININDEX>/" \
@@ -371,8 +373,6 @@ do
 	   $HOME/.fldigi-$SIDE/fldigi_def.xml	
    fi   
 	echo >&2 "Done."
-
-	
 	
 	# Flrig
 	rm -rf $HOME/.flrig-$SIDE
@@ -393,7 +393,6 @@ do
    PID_=$!
    sleep 2
    WID=$(xdotool search --pid $PID_ 2>/dev/null)
-   echo "Flmsg WID = $WID"
    xdotool windowclose $WID >/dev/null 2>&1
    sleep 1
    for WID in $(xdotool search --name "flmsg")
