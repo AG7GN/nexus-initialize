@@ -391,19 +391,18 @@ do
 	echo >&2 "Initializing Flmsg $SIDE"
    flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_=$!
-   echo "Flmsg PID = $PID_"
-   sleep 2
    WID=$(xdotool search --pid $PID_ 2>/dev/null)
    echo "Flmsg WID = $WID"
    xdotool windowclose $WID >/dev/null 2>&1
+   sleep 1
    for WID in $(xdotool search --name "flmsg")
    do
-   	sleep 2
       xdotool windowclose $WID >/dev/null 2>&1
    done
    [[ -s $HOME/.nbems-$SIDE/FLMSG.prefs ]] && echo "FLMSG.prefs exists" || echo "FLMSG.prefs does NOT exist"
    sleep 1
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
+	pkill -SIGTERM flmsg
 	echo >&2 "Done."
 
 	# Flarq
