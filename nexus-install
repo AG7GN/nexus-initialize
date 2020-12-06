@@ -397,25 +397,8 @@ do
       xdotool windowclose $WID >/dev/null 2>&1
    done
    pkill -SIGTERM flmsg
-   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
-	echo >&2 "Done."
-
-	# Flamp
-	echo >&2 "Initializing Flamp $SIDE"
-   flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
-   PID_=$!
    sleep 1
-   WID=$(xdotool search --pid $PID_)
-   xdotool windowclose $WID >/dev/null 2>&1
-   sleep 2
-   for WID in $(xdotool search --name "flamp")
-   do
-      xdotool windowclose $WID >/dev/null 2>&1
-   done
-   pkill -SIGTERM flamp
-   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
-   		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
-   		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
 	echo >&2 "Done."
 
 	# Flarq
