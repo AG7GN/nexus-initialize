@@ -371,6 +371,8 @@ do
 	   $HOME/.fldigi-$SIDE/fldigi_def.xml	
    fi   
 	echo >&2 "Done."
+
+	
 	
 	# Flrig
 	rm -rf $HOME/.flrig-$SIDE
@@ -400,27 +402,28 @@ do
       xdotool windowclose $WID >/dev/null 2>&1
    done
    pkill -SIGTERM flmsg
+   [[ -s $HOME/.nbems-$SIDE/FLMSG.prefs ]] && echo "FLMSG.prefs exists" || echo "FLMSG.prefs does NOT exist"
    sleep 1
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
 	echo >&2 "Done."
 
 	# Flarq
-	echo >&2 "Initializing Flamp $SIDE"
-   flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
-   PID_=$!
-   sleep 1
-   WID=$(xdotool search --pid $PID_)
-   xdotool windowclose $WID >/dev/null 2>&1
-   sleep 2
-   for WID in $(xdotool search --name "flamp")
-   do
-      xdotool windowclose $WID >/dev/null 2>&1
-   done
-   pkill -SIGTERM flarq
-   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
-   		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
-   		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
-	echo >&2 "Done."
+	#echo >&2 "Initializing Flamp $SIDE"
+   #flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
+   #PID_=$!
+   #sleep 1
+   #WID=$(xdotool search --pid $PID_)
+   #xdotool windowclose $WID >/dev/null 2>&1
+   #sleep 2
+   #for WID in $(xdotool search --name "flamp")
+   #do
+   #   xdotool windowclose $WID >/dev/null 2>&1
+   #done
+   #pkill -SIGTERM flarq
+   #sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
+  # 		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
+  # 		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
+	#echo >&2 "Done."
 
 done
 
