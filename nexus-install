@@ -271,7 +271,9 @@ then
 	cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa 1>/dev/null
 fi
 echo >&2 "Done."
+echo >&2 "Restarting pulseaudio..."
 systemctl --user restart pulseaudio 
+echo >&2 "Done."
 
 ####### Real Time Clock #########
 
