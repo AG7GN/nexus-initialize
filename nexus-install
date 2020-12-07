@@ -264,12 +264,13 @@ sudo cp -f nexus-initialize/etc/asound.conf /etc/asound.conf
 sudo cp -f /etc/pulse/default.pa /etc/pulse/default.pa.previous
 echo >&2 "Done."
 
+echo >&2 "Adding Fe-Pi configuration to pulseaudio /etc/pulse/default.pa if necessary..."
 if ! grep -i -q "^# Fe-Pi card setup"
 then
-	echo >&2 "Adding Fe-Pi configuration to pulseaudio /etc/pulse/default.pa..."
+	echo >&2 "Fe-Pi config not present. Adding..."
 	cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa 1>/dev/null
-	echo >&2 "Done."
 fi
+echo >&2 "Done."
 systemctl --user restart pulseaudio 
 
 ####### Real Time Clock #########
