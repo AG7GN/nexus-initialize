@@ -197,6 +197,20 @@ function NexusLocalRepoUpdate() {
 	fi
 }
 
+function WaitFor() {
+   # Waits for a timeout to expire or a file to exist, whichever occurs first.
+   # If timer expires, returns $FALSE, otherwise returns $TRUE
+   # arg1: Path to file to look for
+   # arg2: (optional) Timeout in seconds. Default is 5
+   FILE_="$1"
+   local -i T=${2:-5}
+   while [[ ! -f "$FILE_" ]] && (( $T > 0 ))
+   do
+      sleep 1
+      ((T--))
+   done
+   (( $T == 0 )) && return $FALSE || return $TRUE
+}
 
 #============================
 #  FILES AND VARIABLES
@@ -233,41 +247,41 @@ TITLE="Nexus Initializer - version $VERSION"
 
 ####### AUDIO Setup ###########
 
-# Append sound directives to the end of cmdline.txt to restore ALSA sound
-# interface definitions using the old method (needed for compatibility with Fldigi
-# alert sounds as well as to retain the ability to switch between HDMI and 
-# Analog from the Desktop).
-#CONFIG_="/boot/cmdline.txt"
-#CMD_STRING="snd-bcm2835.enable_compat_alsa=1 snd-bcm2835.enable_hdmi=0 snd-bcm2835.enable_headphones=0"
-#if ! grep -q $CMD_STRING $CONFIG_ 2>/dev/null
-#then
-#	sudo sed -i -e "s/$/ $CMD_STRING/" $CONFIG_
-#fi
-echo "Adding Fe-Pi dtoverlay if needed"
+echo "Adding Fe-Pi dtoverlay if needed..."
 CONFIG_="/boot/config.txt"
 if ! grep -q "^dtoverlay=fe-pi-audio" $CONFIG_
 then
 	echo "# Enable Fe Pi audio card"  | sudo tee --append $CONFIG_
 	echo "dtoverlay=fe-pi-audio" | sudo tee --append $CONFIG_
 fi
+echo >&2 "Done."
 
-sudo sudo cp -f nexus-initialize/usr/share/alsa/pulse-alsa.conf /usr/share/alsa/
-[[ -s /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
+echo >&2 "Moving ALSA and pulseaudio configuration files into position..."
+[[ -f $HOME/.asoundrc ]] && mv -f $HOME/.asoundrc $HOME/.asoundrc.previous
+[[ -f /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
 sudo cp -f nexus-initialize/etc/asound.conf /etc/asound.conf
-[[ -s $HOME/.config/pulse/default.pa ]] && rm -f $HOME/.config/pulse/default.pa
+[[ -f $HOME/.config/pulse/default.pa ]] && mv -f $HOME/.config/pulse/default.pa $HOME/.config/pulse/default.pa.previous
 sudo cp -f /etc/pulse/default.pa /etc/pulse/default.pa.previous
-cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa
-systemctl --user restart pulseaudio >/dev/null
+echo >&2 "Done."
 
-####### Check for Real Time Clock dtoverlay #########
+if ! grep -i -q "^# Fe-Pi card setup"
+then
+	echo >&2 "Adding Fe-Pi configuration to pulseaudio /etc/pulse/default.pa..."
+	cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa 1>/dev/null
+	echo >&2 "Done."
+fi
+systemctl --user restart pulseaudio 
+
+####### Real Time Clock #########
 
 # Check for RTC dtoverlay
-echo "Adding RTC dtoverlay if needed"
+echo >&2 "Adding RTC dtoverlay if needed..."
 if ! grep -q "^dtoverlay=i2c-rtc,ds3231" $CONFIG_
 then
-	echo "# Enable ds3231 Real Time Clock (RTC)"  | sudo tee --append $CONFIG_
-	echo "dtoverlay=i2c-rtc,ds3231" | sudo tee --append $CONFIG_
+	echo "# Enable ds3231 Real Time Clock (RTC)"  | sudo tee --append $CONFIG_ 1>/dev/null
+	echo "dtoverlay=i2c-rtc,ds3231" | sudo tee --append $CONFIG_ 1>/dev/null
 fi
+echo >&2 "Done."
 
 ####### Install nexus-updater
 NexusLocalRepoUpdate nexus-updater $NEXUS_UPDATER_GIT_URL
@@ -325,6 +339,11 @@ declare -A FLMSG_WEB_PORT
 FLMSG_WEB_PORT[left]=8080
 FLMSG_WEB_PORT[right]=8090
 
+declare -A REVERSEAUDIO
+REVERSEAUDIO[left]=0
+REVERSEAUDIO[right]=1
+
+
 for SIDE in left right
 do
 
@@ -339,7 +358,7 @@ do
    do
       WID=$(xdotool search --pid $PID_FLDIGI 2>/dev/null)
       [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
-      sleep 2
+      WaitFor $HOME/.fldigi-$SIDE/fldigi_def.xml || Die "$HOME/.fldigi-$SIDE/fldigi_def.xml never created."
    done
    pkill -SIGTERM fldigi
    FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title \"Flmsg ($SIDE radio)\""
@@ -361,17 +380,12 @@ do
    -e "s/<FLRIG_IP_PORT>.*<\/FLRIG_IP_PORT>/FLRIG_IP_PORT>${FLRIG_PORT[$SIDE]}<\/FLRIG_IP_PORT>/" \
    -e "s/<XMLLOG_PORT>.*<\/XMLLOG_PORT>/XMLLOG_PORT>${XMLLOG_PORT[$SIDE]}<\/XMLLOG_PORT>/" \
    -e "s/<FSQLOWERCASE>.*<\/FSQLOWERCASE>/<FSQLOWERCASE>1<\/FSQLOWERCASE>/" \
+   -e "s/<FSQSHOWMONITOR>.*<\/FSQSHOWMONITOR>/<FSQSHOWMONITOR>1<\/FSQSHOWMONITOR>/" \
    -e "s/<OPEN_FLMSG_PRINT>.*<\/OPEN_FLMSG_PRINT>/<OPEN_FLMSG_PRINT>0<\/OPEN_FLMSG_PRINT>/" \
    -e "s|<FLMSG_PATHNAME>.*</FLMSG_PATHNAME>|<FLMSG_PATHNAME>$FLMSG_STRING</FLMSG_PATHNAME>|" \
-   $HOME/.fldigi-$SIDE/fldigi_def.xml
-   
-   if [[ $SIDE == "right" ]]
-   then
-   	sed -i \
-   	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>1<\/REVERSEAUDIO>/" \
-	   -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>1<\/REVERSERXAUDIO>/" \
-	   $HOME/.fldigi-$SIDE/fldigi_def.xml	
-   fi   
+  	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/" \
+   -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
+   $HOME/.fldigi-$SIDE/fldigi_def.xml 
 	echo >&2 "Done."
 	
 	# Flrig
@@ -399,10 +413,9 @@ do
    do
       xdotool windowclose $WID >/dev/null 2>&1
    done
-   [[ -s $HOME/.nbems-$SIDE/FLMSG.prefs ]] && echo "FLMSG.prefs exists" || echo "FLMSG.prefs does NOT exist"
-   sleep 1
-   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
+   WaitFor $HOME/.nbems-$SIDE/FLMSG.prefs || Die "$HOME/.nbems-$SIDE/FLMSG.prefs never created."
 	pkill -SIGTERM flmsg
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
 	echo >&2 "Done."
 
 	# Flarq
