@@ -424,7 +424,7 @@ do
 	echo >&2 "Initializing Flamp $SIDE"
    fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    sleep 5
-   flamp --config-dir $HOME/.nbems-$SIDE &
+   flamp --config-dir $HOME/.nbems-$SIDE --xmlrpc-server-port ${XML_PORT[$SIDE]} &
    PID_=$!
    WID=$(xdotool search --pid $PID_)
    xdotool windowclose $WID >/dev/null 2>&1
