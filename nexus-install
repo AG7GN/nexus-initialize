@@ -425,7 +425,7 @@ do
    fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_FLDIGI=$!
    sleep 5
-   flamp --config-dir $HOME/.nbems-$SIDE/FLAMP &
+   flamp --config-dir $HOME/.nbems-$SIDE &
    PID_=$!
    #WID=$(xdotool search --pid $PID_)
    #xdotool windowclose $WID >/dev/null 2>&1
