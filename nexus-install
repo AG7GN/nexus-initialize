@@ -439,6 +439,13 @@ do
    		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
    		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
 	echo >&2 "Done."
+	
+	# Flarq
+	echo >&2 "Initializing Flarq $SIDE"
+   sed -i -e "s/arq-server-port.*/arq-server-port ${ARQ_PORT[$SIDE]}/" \
+   		/usr/local/share/applications/flarq-$SIDE.desktop
+	echo >&2 "Done."
+	
 
 done
 
