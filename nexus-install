@@ -414,6 +414,7 @@ do
    for WID in $(xdotool search --name "flmsg")
    do
       xdotool windowclose $WID >/dev/null 2>&1
+      sleep 1
    done
    WaitFor $HOME/.nbems-$SIDE/FLMSG.prefs || Die "$HOME/.nbems-$SIDE/FLMSG.prefs never created."
 	pkill -SIGTERM flmsg
