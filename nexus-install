@@ -427,8 +427,7 @@ do
    flamp --config-dir $HOME/.nbems-$SIDE --xmlrpc-server-port ${XML_PORT[$SIDE]} >/dev/null 2>&1 &
    PID_=$!
    sleep 1
-   #for WID in $(xdotool search --pid $PID_ | sort -r)
-   for WID in $(xdotool search --name "flamp" | sort -r)
+   for WID in $(xdotool search --pid $PID_ | sort -r)
    do
 	   xdotool windowclose $WID >/dev/null 2>&1
 	   sleep 1
