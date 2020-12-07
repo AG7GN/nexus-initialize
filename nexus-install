@@ -426,13 +426,9 @@ do
    sleep 5
    flamp --config-dir $HOME/.nbems-$SIDE --xmlrpc-server-port ${XML_PORT[$SIDE]} &
    PID_=$!
-   WID=$(xdotool search --pid $PID_)
-   xdotool windowclose $WID >/dev/null 2>&1
-   while pgrep flamp >/dev/null 2>&1
+   for WID in $(xdotool search --pid $PID_ | sort -r)
    do
-   	sleep 1
-	   WID=$(xdotool search --pid $PID_ 2>/dev/null)
-      [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
+	   xdotool windowclose $WID >/dev/null 2>&1
    done
    pkill -SIGTERM flamp
 	pkill -SIGTERM fldigi
