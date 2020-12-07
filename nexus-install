@@ -77,7 +77,6 @@ function TrapCleanup() {
 function SafeExit() {
   # Exit with arg1
   EXIT_CODE=${1:-0}
-  AdjustSwap  # Restore swap if needed
   # Delete temp files, if any
   [[ -d "${TMPDIR}" ]] && rm -rf "${TMPDIR}/"
   trap - INT TERM EXIT
@@ -361,8 +360,8 @@ do
    do
       WID=$(xdotool search --pid $PID_FLDIGI 2>/dev/null)
       [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
-      WaitFor $HOME/.fldigi-$SIDE/fldigi_def.xml || Die "$HOME/.fldigi-$SIDE/fldigi_def.xml never created."
    done
+   WaitFor $HOME/.fldigi-$SIDE/fldigi_def.xml || Die "$HOME/.fldigi-$SIDE/fldigi_def.xml never created."
    pkill -SIGTERM fldigi
    FLMSG_STRING="/usr/local/bin/flmsg --flmsg-dir /home/pi/.nbems-$SIDE --server-port ${FLMSG_WEB_PORT[$SIDE]} -title \"Flmsg ($SIDE radio)\""
 	sed -i -e "s/<SIGONRIGHTCHANNEL>.*<\/SIGONRIGHTCHANNEL>/<SIGONRIGHTCHANNEL>0<\/SIGONRIGHTCHANNEL>/" \
