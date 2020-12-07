@@ -428,7 +428,7 @@ do
    PID_=$!
    sleep 1
    #for WID in $(xdotool search --pid $PID_ | sort -r)
-   for WID in $(xdotool search --name "flamp")
+   for WID in $(xdotool search --name "flamp" | sort -r)
    do
 	   xdotool windowclose $WID >/dev/null 2>&1
 	   sleep 1
