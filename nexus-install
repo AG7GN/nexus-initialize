@@ -430,6 +430,7 @@ do
    xdotool windowclose $WID >/dev/null 2>&1
    while pgrep flamp >/dev/null 2>&1
    do
+   	sleep 1
 	   WID=$(xdotool search --pid $PID_ 2>/dev/null)
       [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
    done
