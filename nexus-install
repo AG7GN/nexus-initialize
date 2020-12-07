@@ -429,10 +429,11 @@ do
    sleep 1
    WID=$(xdotool search --pid $PID_)
    xdotool windowclose $WID >/dev/null 2>&1
-   sleep 2
-   for WID in $(xdotool search --name "flamp")
+
+   while pgrep flamp >/dev/null 2>&1
    do
-      xdotool windowclose $WID >/dev/null 2>&1
+	   WID=$(xdotool search --pid $PID_ 2>/dev/null)
+      [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
    done
    pkill -SIGTERM flamp
    while pgrep fldigi >/dev/null 2>&1
