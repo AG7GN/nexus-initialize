@@ -422,25 +422,24 @@ do
 
 	# Flamp
 	echo >&2 "Initializing Flamp $SIDE"
-   fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
-   PID_FLDIGI=$!
+#   fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
+#   PID_FLDIGI=$!
    flamp --flmsg-dir $HOME/.nbems-$SIDE/FLAMP >/dev/null 2>&1 &
    PID_=$!
    sleep 1
    WID=$(xdotool search --pid $PID_)
    xdotool windowclose $WID >/dev/null 2>&1
-
    while pgrep flamp >/dev/null 2>&1
    do
 	   WID=$(xdotool search --pid $PID_ 2>/dev/null)
       [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
    done
    pkill -SIGTERM flamp
-   while pgrep fldigi >/dev/null 2>&1
-   do
-      WID=$(xdotool search --pid $PID_FLDIGI 2>/dev/null)
-      [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
-   done
+#   while pgrep fldigi >/dev/null 2>&1
+#   do
+#      WID=$(xdotool search --pid $PID_FLDIGI 2>/dev/null)
+#      [[ ! -z $WID ]] && xdotool windowclose $WID >/dev/null 2>&1
+#   done
    WaitFor $HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs || Die "$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs never created."
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
    		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
