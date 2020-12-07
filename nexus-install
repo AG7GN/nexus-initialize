@@ -265,7 +265,7 @@ sudo cp -f /etc/pulse/default.pa /etc/pulse/default.pa.previous
 echo >&2 "Done."
 
 echo >&2 "Adding Fe-Pi configuration to pulseaudio /etc/pulse/default.pa if necessary..."
-if ! grep -i -q "^# Fe-Pi card setup"
+if ! grep -i -q "^# Fe-Pi card setup" /etc/pulse/default.pa
 then
 	echo >&2 "Fe-Pi config not present. Adding..."
 	cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa 1>/dev/null
