@@ -424,6 +424,7 @@ do
 	echo >&2 "Initializing Flamp $SIDE"
    fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_FLDIGI=$!
+   sleep 3
    flamp --config-dir $HOME/.nbems-$SIDE/FLAMP &
    PID_=$!
    #WID=$(xdotool search --pid $PID_)
