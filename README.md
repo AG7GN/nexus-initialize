@@ -15,6 +15,16 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 	- Change hostname to 'nexus'
 	- In __Interfaces__ tab, enable SSH, VNC, SPI, I2C, Serial Port
 
+1) Terminal settings
+
+	- Open a Terminal window
+	- Click __Edit > Preferences__.
+	- Change Terminal font to Monospace Regular 14
+	- Change Display scrollbak lines to 100000
+	- Change Display window size to 100 x 30
+	- Click __OK__
+	- Close and re-open Terminal to test
+
 1) Reboot
 
 1) Change password to `changeme` if prompted
@@ -63,7 +73,7 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 		sudo apt-get install vim tcpdump lsof gpm telnet minicom links exfat-utils \
 		yad dosfstools xscreensaver build-essential autoconf automake libtool cmake \
 		extra-xdg-menus bc dnsutils libgtk-3-bin jq xdotool moreutils build-essential \
-		exfat-utils aptitude
+		aptitude
 		sudo apt update
 
 1) Create `~\.vimrc` as follows:
@@ -119,7 +129,7 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 
 		" CTRL-U in insert mode deletes a lot.  Use CTRL-G u to first break undo,
 		" so that you can undo CTRL-U after inserting a line break.
-		inoremap <C-U> <C-G>u<C-U>
+		ignoremap <C-U> <C-G>u<C-U>
 
 		" In many terminal emulators the mouse works just fine, thus enable it.
 		"if has('mouse')
