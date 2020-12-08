@@ -377,7 +377,7 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 		sudo chown $USER:$USER /usr/local/src/nexus
 		cd /usr/local/src/nexus
 		git clone https://github.com/AG7GN/nexus-initialize
-		nexus-initialize/nexus-install
+		nexus-initialize/nexus-install -f
 	
 	The `nexus-install` command will delete `$HOME/DO_NOT_DELETE_THIS_FILE_`, which will cause initialize-pi.sh to run at next boot. `initialize-pi.sh` will clear out user's home folder and other personal data from some apps.
 	
@@ -403,6 +403,6 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 
 		echo "NEXUS_VERSION=20201209" | sudo tee /boot/nexus.txt 1>/dev/null
 		
-1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE_` and shutdown (don't reboot).
+1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE` and shutdown (don't reboot).
 
 Image is now ready for distribution
