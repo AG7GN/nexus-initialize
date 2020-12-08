@@ -61,7 +61,7 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 1) Install the toolchains and packages:
 
 		sudo apt-get install vim tcpdump lsof gpm telnet minicom links exfat-utils \
-		dosfstools xscreensaver build-essential autoconf automake libtool cmake \
+		yad dosfstools xscreensaver build-essential autoconf automake libtool cmake \
 		extra-xdg-menus bc dnsutils libgtk-3-bin jq xdotool moreutils build-essential \
 		exfat-utils aptitude
 		sudo apt update
