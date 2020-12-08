@@ -403,6 +403,17 @@ then
 	fi
 fi
 
+####### Set background
+mkdir -p $HOME/.config/pcmanfm/LXDE-pi
+cp -f nexus-utilities/desktop-items-0.conf $HOME/.config/pcmanfm/LXDE-pi/
+pcmanfm --reconfigure
+
+#if [ -f $HOME/Pictures/NexusDeskTop.jpg ]
+#then
+#	sed -i -e "s|^wallpaper=.*|wallpaper=$HOME/Pictures/NexusDeskTop.jpg|" $HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+#fi
+
+
 ####### Install nexus-rmsgw
 #nexus-updater.sh nexus-rmsgw
 
