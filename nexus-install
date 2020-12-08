@@ -3,21 +3,16 @@
 # HEADER
 #================================================================
 #% SYNOPSIS
-#+   ${SCRIPT_NAME} [-hv] 
-#+   ${SCRIPT_NAME} [-d DIRECTORY] [-l FILE] [-f FILE] [APP[,APP]...]
+#+   ${SCRIPT_NAME} [-hvf] 
 #%
 #% DESCRIPTION
-#%   This script updates the Raspberry Pi image designed for use on the Nexus DR-X.
-#%   It can update the Raspbian OS as well as select ham applications.
+#%   This script updates setups up the Nexus image. It will erase most current settings
+#%   if they exist
 #%
 #% OPTIONS
 #%    -h, --help              Print this help
 #%    -v, --version           Print script information
-#%    -l, --list              List of applications this script has the ability to
-#%                            install.
-#%    -s, --self-check        Scripts checks for a new version of itself when run and
-#%                            automatically updates itself if an update is available.
-#%    -f, --force-reinstall   Re-install an application even if it's up to date
+#%    -f, --force             Run script without printing warning message.
 #% 
 #% COMMANDS 
 #%    APP(s)                  Zero or more applications (comma separated) to install,
@@ -243,6 +238,99 @@ sudo mkdir -p $SRC_DIR
 sudo chown -f -R $USER:$USER $SRC_DIR
 sudo mkdir -p /usr/local/share/applications
 TITLE="Nexus Initializer - version $VERSION"
+RUN_IT=$FALSE
+
+#============================
+#  PARSE OPTIONS WITH GETOPTS
+#============================
+
+Optnum=$#
+  
+#== set short options ==#
+SCRIPT_OPTS=':fhv-:'
+
+#== set long options associated with short one ==#
+typeset -A ARRAY_OPTS
+ARRAY_OPTS=(
+	[help]=h
+	[version]=v
+	[string]=s
+	[port]=p
+)
+
+LONG_OPTS="^($(echo "${!ARRAY_OPTS[@]}" | tr ' ' '|'))="
+
+# Parse options
+while getopts ${SCRIPT_OPTS} OPTION
+do
+	# Translate long options to short
+	if [[ "x$OPTION" == "x-" ]]
+	then
+		LONG_OPTION=$OPTARG
+		LONG_OPTARG=$(echo $LONG_OPTION | egrep "$LONG_OPTS" | cut -d'=' -f2-)
+		LONG_OPTIND=-1
+		[[ "x$LONG_OPTARG" = "x" ]] && LONG_OPTIND=$OPTIND || LONG_OPTION=$(echo $OPTARG | cut -d'=' -f1)
+		[[ $LONG_OPTIND -ne -1 ]] && eval LONG_OPTARG="\$$LONG_OPTIND"
+		OPTION=${ARRAY_OPTS[$LONG_OPTION]}
+		[[ "x$OPTION" = "x" ]] &&  OPTION="?" OPTARG="-$LONG_OPTION"
+		
+		if [[ $( echo "${SCRIPT_OPTS}" | grep -c "${OPTION}:" ) -eq 1 ]]; then
+			if [[ "x${LONG_OPTARG}" = "x" ]] || [[ "${LONG_OPTARG}" = -* ]]; then 
+				OPTION=":" OPTARG="-$LONG_OPTION"
+			else
+				OPTARG="$LONG_OPTARG";
+				if [[ $LONG_OPTIND -ne -1 ]]; then
+					[[ $OPTIND -le $Optnum ]] && OPTIND=$(( $OPTIND+1 ))
+					shift $OPTIND
+					OPTIND=1
+				fi
+			fi
+		fi
+	fi
+
+	# Options followed by another option instead of argument
+	if [[ "x${OPTION}" != "x:" ]] && [[ "x${OPTION}" != "x?" ]] && [[ "${OPTARG}" = -* ]]; then 
+		OPTARG="$OPTION" OPTION=":"
+	fi
+
+	# Finally, manage options
+	case "$OPTION" in
+		h) 
+			ScriptInfo full
+			SafeExit 0
+			;;
+		v) 
+			ScriptInfo version
+			SafeExit 0
+			;;
+		f) 
+			RUN_IT=$TRUE
+			;;
+		:) 
+			Die "${SCRIPT_NAME}: -$OPTARG: option requires an argument"
+			;;
+		?) 
+			Die "${SCRIPT_NAME}: -$OPTARG: unknown option"
+			;;
+	esac
+done
+shift $((${OPTIND} - 1)) ## shift options
+
+
+#============================
+#  MAIN SCRIPT
+#============================
+
+if [[ $RUN_IT == $FALSE ]]
+then
+	echo >&2 "This script initializes a base Raspbian with Desktop OS, creating the Nexus"
+	echo >&2 "image. If run with the -f option, it will overwrite MANY configuration"
+	echo >&2 "settings, so use with care. "
+	echo >&2
+	echo >&2 "Run this script again with -f if you REALLY want to create a Nexus image."
+	echo >&2
+	SafeExit 0
+fi
 
 ####### AUDIO Setup ###########
 

@@ -1,10 +1,12 @@
 # Preparing a New Nexus Image
 
+Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityos.com/HAM/CentosDigitalModes/RPi/rpi4-setup.html).
+
 1) Download the "Raspbian Pi OS with desktop" [image](https://www.raspberrypi.org/software/operating-systems/) and burn it to an SD card.
 
 1) Boot the SD card in the Pi.
 
-1) Follow prompts providing the requested settings.
+1) Follow prompts and provide the requested settings.
 
 1) Reboot when prompted.
 
@@ -21,7 +23,7 @@
 
 		sudo systemctl disable nfs-client.target
 
-1) Bring it up top date
+1) Bring it up to date
 
 		sudo apt-get clean
 		sudo apt-get update
@@ -43,15 +45,25 @@
 		wget http://www.trinityos.com/HAM/CentosDigitalModes/RPi/usr/local/sbin/remove-old-kernels.sh
 		sudo mv /tmp/remove-old-kernels.sh /usr/local/sbin/
 		sudo chmod 700 /usr/local/sbin/remove-old-kernels.sh
-		sudo  /usr/local/sbin/remove-old-kernels.sh
+		sudo /usr/local/sbin/remove-old-kernels.sh
 
 1) Install persistent iptables:
 
 		sudo apt-get install iptables-persistent
 		
-1) Install required packages
+1) Edit `/etc/apt/sources.list` and enable `deb-src`:	
 
-		sudo apt-get install vim tcpdump lsof gpm telnet minicom links exfat-utils dosfstools xscreensaver build-essential autoconf automake libtool cmake extra-xdg-menus bc dnsutils libgtk-3-bin jq xdotool moreutils build-essential aptitude
+	- Uncomment the line starting with `#deb-src` so it looks like:
+	
+			deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
+	- Save and close the file
+			
+1) Install the toolchains and packages:
+
+		sudo apt-get install vim tcpdump lsof gpm telnet minicom links exfat-utils \
+		dosfstools xscreensaver build-essential autoconf automake libtool cmake \
+		extra-xdg-menus bc dnsutils libgtk-3-bin jq xdotool moreutils build-essential \
+		exfat-utils aptitude
 		sudo apt update
 
 1) Create `~\.vimrc` as follows:
@@ -206,6 +218,7 @@
 	
 			*.*;auth,authpriv.none        -/var/log/syslog
 		and change it to:
+			
 			*.*;auth,authpriv,mail.none        -/var/log/syslog
 	- Delete these lines:
 
@@ -223,7 +236,7 @@
    
    			kern.*                        -/var/log/kern.log
    			
-		and right after it add:	
+		and insert a new line with this text right after:	
 
 			kern.debug                    stop
 			
@@ -333,21 +346,6 @@
 			sudo systemctl enable watchdog
 			sudo systemctl start watchdog.service
 
-1) Install the toolchains and other utilities:
-
-		sudo apt install build-essential autoconf automake libtool extra-xdg-menus bc dnsutils libgtk-3-bin jq xdotool moreutils exfat-utils build-essential aptitude
-		sudo apt update
-		
-1) Edit `/etc/apt/sources.list` and enable `deb-src`:	
-
-	- Uncomment the line starting with `#deb-src` so it looks like:
-	
-			deb-src http://raspbian.raspberrypi.org/raspbian/ buster main contrib non-free rpi
-	- Save and close the file
-	- Update the apt cache:
-	
-			sudo apt update
-			
 1) Changes to `/boot/config.txt`
 
 	- Uncomment this line:
@@ -394,4 +392,5 @@
 	git clone https://github.com/AG7GN/nexus-initialize
 	nexus-initialize/nexus-install
 	
+1)
 
