@@ -392,5 +392,7 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 	git clone https://github.com/AG7GN/nexus-initialize
 	nexus-initialize/nexus-install
 	
-1)
+1) Click __Raspberry > Preferences > Main Menu editor__ and arrange menu to suit.
+
+
 

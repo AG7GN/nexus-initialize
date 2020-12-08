@@ -389,6 +389,20 @@ do
 		$DESKTOP | sudo tee ${DESKTOP%%.*}.desktop 1>/dev/null
 done
 
+####### Check Autostart 
+
+# Check for presence of system LXDE-pi autostart and insert check-piano.sh if not 
+# already present. nexus-utilities/nexus-install should take care of this, but checck
+# anyway
+AUTOSTART="/etc/xdg/lxsession/LXDE-pi/autostart"
+if [[ -s $AUTOSTART ]] 
+then
+	if ! grep -q check-piano.sh $AUTOSTART 2>/dev/null
+	then
+		sudo sed -i '/@pcmanfm .*/a @bash \/usr\/local\/sbin\/check-piano.sh' $AUTOSTART
+	fi
+fi
+
 ####### Install nexus-rmsgw
 #nexus-updater.sh nexus-rmsgw
 
@@ -531,7 +545,8 @@ do
 	# Flarq
 	echo >&2 "Initializing Flarq $SIDE"
    sudo sed -i -e "s/arq-server-port.*/arq-server-port ${ARQ_PORT[$SIDE]}/" \
-   		/usr/local/share/applications/flarq-$SIDE.desktop
+   		/usr/local/share/applications/flarq-$SIDE.desktop \
+   		/usr/local/share/applications/flarq-$SIDE.template
 	echo >&2 "Done."
 	
 
