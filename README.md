@@ -1,13 +1,13 @@
 # Preparing a New Nexus Image
 
-Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityos.com/HAM/CentosDigitalModes/RPi/rpi4-setup.html).
+Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http://www.trinityos.com/HAM/CentosDigitalModes/RPi/rpi4-setup.html).
 
 1) Download the "Raspbian Pi OS with desktop" [image](https://www.raspberrypi.org/software/operating-systems/) and burn it to an SD card.
 
 1) Boot the SD card in the Pi.
 
-1) Follow prompts and provide the requested settings.
-
+1) Follow prompts and provide the requested settings.  
+	
 1) Reboot when prompted.
 
 1) Run __Raspberry > Preferences > Raspberry Pi Configuration__
@@ -17,7 +17,7 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 
 1) Reboot
 
-1) Change password if prompted
+1) Change password to `changeme` if prompted
 
 1) Disable NFS clients
 
@@ -396,4 +396,10 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 	
 1) Reboot and test VNC again.
 
-1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE_` and reboot.
+1) Set version (update date as needed)
+
+		echo "NEXUS_VERSION=20201209" | sudo tee /boot/nexus.txt 1>/dev/null
+		
+1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE_` and shutdown (don't reboot).
+
+Image is now ready for distribution
