@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.0.13
+#-    version         ${SCRIPT_NAME} 2.0.14
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -572,7 +572,8 @@ do
    		/usr/local/share/applications/flarq-$SIDE.template
 	echo >&2 "Done."
 	
-
 done
 
+#rm -f $HOME/DO_NOT_DELETE_THIS_FILE
+echo >&2 "Initialization complete. Reboot now."
 

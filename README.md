@@ -368,6 +368,18 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 
 1) Reboot
 
+1) Install `nexus-initialize` files and scripts and run initializer
+
+		sudo mkdir -p /usr/local/src/nexus
+		sudo chown $USER:$USER /usr/local/src/nexus
+		cd /usr/local/src/nexus
+		git clone https://github.com/AG7GN/nexus-initialize
+		nexus-initialize/nexus-install
+	
+	The `nexus-install` command will delete `$HOME/DO_NOT_DELETE_THIS_FILE_`, which will cause initialize-pi.sh to run at next boot. `initialize-pi.sh` will clear out user's home folder and other personal data from some apps.
+	
+1) Click __Raspberry > Preferences > Main Menu editor__ and arrange menu to suit.
+
 1) Try connecting to the Pi from a VNC client
 
 	- Should be able to go to `nexus.local`
@@ -384,15 +396,4 @@ Many of these items are from David Ranch's excellent [HOWTO](http://www.trinityo
 	
 1) Reboot and test VNC again.
 
-1) Install `nexus-initialize` files and scripts
-
-	sudo mkdir -p /usr/local/src/nexus
-	sudo chown $USER:$USER /usr/local/src/nexus
-	cd /usr/local/src/nexus
-	git clone https://github.com/AG7GN/nexus-initialize
-	nexus-initialize/nexus-install
-	
-1) Click __Raspberry > Preferences > Main Menu editor__ and arrange menu to suit.
-
-
-
+1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE_` and reboot.
