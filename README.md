@@ -352,13 +352,6 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 	
 			hdmi_force_hotplug=1
 	
-	- Add these lines to enable Fe-Pi and RTC:
-	
-			# Enable Fe Pi audio card
-			dtoverlay=fe-pi-audio
-			# Enable ds3231 Real Time Clock (RTC)
-			dtoverlay=i2c-rtc,ds3231
-
 1) Set resolution
 
 	- Run `sudo raspi-config`

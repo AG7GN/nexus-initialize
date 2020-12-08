@@ -428,7 +428,7 @@ cat <(fgrep -i -v "$WHAT" <(sudo crontab -u $WHO -l)) <(echo "$JOB") | sudo cron
 
 
 ####### Install nexus-rmsgw
-#nexus-updater.sh nexus-rmsgw
+nexus-updater.sh nexus-rmsgw
 
 ####### Set up Fldigi to use PulseAudio with Fe-Pi sound card.
 rm -rf $HOME/.nbems
@@ -574,6 +574,6 @@ do
 	
 done
 
-#rm -f $HOME/DO_NOT_DELETE_THIS_FILE
+rm -f $HOME/DO_NOT_DELETE_THIS_FILE
 echo >&2 "Initialization complete. Reboot now."
 
