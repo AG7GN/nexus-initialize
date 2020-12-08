@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.0.12
+#-    version         ${SCRIPT_NAME} 2.0.13
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -192,10 +192,12 @@ function NexusLocalRepoUpdate() {
 }
 
 function WaitFor() {
+
    # Waits for a timeout to expire or a file to exist, whichever occurs first.
    # If timer expires, returns $FALSE, otherwise returns $TRUE
    # arg1: Path to file to look for
    # arg2: (optional) Timeout in seconds. Default is 5
+
    FILE_="$1"
    local -i T=${2:-5}
    while [[ ! -f "$FILE_" ]] && (( $T > 0 ))
@@ -363,7 +365,6 @@ systemctl --user restart pulseaudio
 echo >&2 "Done."
 
 ####### Real Time Clock #########
-
 # Check for RTC dtoverlay
 echo >&2 "Adding RTC dtoverlay if needed..."
 if ! grep -q "^dtoverlay=i2c-rtc,ds3231" $CONFIG_
@@ -390,10 +391,10 @@ do
 done
 
 ####### Check Autostart 
-
 # Check for presence of system LXDE-pi autostart and insert check-piano.sh if not 
 # already present. nexus-utilities/nexus-install should take care of this, but checck
 # anyway
+echo >&2 "Adding check-piano.sh to autostart..."
 AUTOSTART="/etc/xdg/lxsession/LXDE-pi/autostart"
 if [[ -s $AUTOSTART ]] 
 then
@@ -402,23 +403,26 @@ then
 		sudo sed -i '/@pcmanfm .*/a @bash \/usr\/local\/sbin\/check-piano.sh' $AUTOSTART
 	fi
 fi
+echo >&2 "Done."
 
 ####### Set background
+echo >&2 "Setting desktop background..."
 mkdir -p $HOME/.config/pcmanfm/LXDE-pi
 cp -f nexus-utilities/desktop-items-0.conf $HOME/.config/pcmanfm/LXDE-pi/
 pcmanfm --reconfigure
+echo >&2 "Done."
 
-#if [ -f $HOME/Pictures/NexusDeskTop.jpg ]
-#then
-#	sed -i -e "s|^wallpaper=.*|wallpaper=$HOME/Pictures/NexusDeskTop.jpg|" $HOME/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-#fi
-
+####### Install and enable the shutdown button service
+echo >&2 "Setting up shutdown button service..."
+sudo cp -f nexus-initialize/etc/systemd/system/shutdown_button.service /etc/systemd/system/
+sudo systemctl enable shutdown_button.service
+sudo systemctl start shutdown_button.service
+echo >&2 "Done."
 
 ####### Install nexus-rmsgw
 #nexus-updater.sh nexus-rmsgw
 
 ####### Set up Fldigi to use PulseAudio with Fe-Pi sound card.
-
 rm -rf $HOME/.nbems
 rm -rf $HOME/.fltk
 
