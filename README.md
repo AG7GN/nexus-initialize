@@ -399,6 +399,12 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 	
 1) Reboot and test VNC again.
 
+1) Open `alsamixer` and verify that the Fe-Pi capture is set to __LINE_IN__ and that the capture attenuation is on (not muted) and that line out is not muted and set to 100. as shown:
+
+![alsamixer settings for fe-pi](img/fe-pi-settings.png)
+
+The settings offscreen to the right are at default values.  Note that the values shown are just a starting point. Some fine tuning may be needed.
+
 1) Set version (update date as needed)
 
 		echo "NEXUS_VERSION=20201209" | sudo tee /boot/nexus.txt 1>/dev/null

@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.0.15
+#-    version         ${SCRIPT_NAME} 2.0.17
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -346,24 +346,14 @@ fi
 echo >&2 "Done."
 
 echo >&2 "Moving ALSA and pulseaudio configuration files into position..."
-[[ -f $HOME/.asoundrc ]] && mv -f $HOME/.asoundrc $HOME/.asoundrc.previous
 [[ -f /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
-sudo cp -f nexus-initialize/etc/asound.conf /etc/asound.conf
-[[ -f $HOME/.config/pulse/default.pa ]] && mv -f $HOME/.config/pulse/default.pa $HOME/.config/pulse/default.pa.previous
-sudo cp -f /etc/pulse/default.pa /etc/pulse/default.pa.previous
+sudo cp -f nexus-initialize/asoundrc $HOME/.asoundrc
+cp -f nexus-initialize/config/pulse/default.pa $HOME/.config/pulse/default.pa 
 sudo cp -f nexus-initialize/etc/udev/rules.d/*.rules /etc/udev/rules.d/
 echo >&2 "Done."
-
-echo >&2 "Adding Fe-Pi configuration to pulseaudio /etc/pulse/default.pa if necessary..."
-if ! grep -i -q "^# Fe-Pi card setup" /etc/pulse/default.pa
-then
-	echo >&2 "Fe-Pi config not present. Adding..."
-	cat nexus-initialize/etc/pulse/default.pa.append | sudo tee --append /etc/pulse/default.pa 1>/dev/null
-fi
-echo >&2 "Done."
-echo >&2 "Restarting pulseaudio..."
-systemctl --user restart pulseaudio 
-echo >&2 "Done."
+#echo >&2 "Restarting pulseaudio..."
+#systemctl --user restart pulseaudio 
+#echo >&2 "Done."
 
 ####### Real Time Clock #########
 # Check for RTC dtoverlay
