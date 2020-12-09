@@ -1,4 +1,4 @@
-.include /etc/pulse/nexus.pa
+.include /etc/pulse/default.pa
 
 # Fe-Pi card setup
 load-module module-alsa-card device_id="Audio" name="fepi" card_name="fepi" namereg_fail=false tsched=yes fixed_latency_range=no ignore_dB=no deferred_volume=yes use_ucm=no rate=96000 format=s16le source_name="fepi-capture" sink_name="fepi-playback" mmap=yes profile_set=default.conf
