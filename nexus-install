@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.0.17
+#-    version         ${SCRIPT_NAME} 2.0.18
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -348,6 +348,8 @@ echo >&2 "Done."
 echo >&2 "Moving ALSA and pulseaudio configuration files into position..."
 [[ -f /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
 cp -f nexus-initialize/asoundrc $HOME/.asoundrc
+# The mode change is needed to make sure alsa doesn't delete .asoundrc
+chmod 0444 $HOME/.asoundrc
 cp -f nexus-initialize/config/pulse/default.pa $HOME/.config/pulse/default.pa 
 sudo cp -f nexus-initialize/etc/udev/rules.d/*.rules /etc/udev/rules.d/
 echo >&2 "Done."
