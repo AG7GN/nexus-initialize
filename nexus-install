@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.0.18
+#-    version         ${SCRIPT_NAME} 2.1.0
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -347,7 +347,7 @@ echo >&2 "Done."
 
 echo >&2 "Moving ALSA and pulseaudio configuration files into position..."
 [[ -f /etc/asound.conf ]] && sudo mv -f /etc/asound.conf /etc/asound.conf.previous
-sudo cp -f nexus-initialize/asoundrc /etc/asound.conf
+sudo cp -f nexus-initialize/etc/asound.conf /etc/
 cp -f nexus-initialize/config/pulse/default.pa $HOME/.config/pulse/default.pa 
 sudo cp -f nexus-initialize/etc/udev/rules.d/*.rules /etc/udev/rules.d/
 echo >&2 "Done."
