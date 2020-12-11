@@ -335,14 +335,6 @@ then
 	SafeExit 0
 fi
 
-####### Install nexus-updater
-NexusLocalRepoUpdate nexus-updater $NEXUS_UPDATER_GIT_URL
-command -v nexus-updater.sh >/dev/null || Die "Nexus Updater installation failed."
-
-####### AUDIO Setup ###########
-####### Install nexus-audio
-nexus-updater.sh nexus-audio $NEXUS_AUDIO_GIT_URL
-
 ####### Real Time Clock #########
 # Check for RTC dtoverlay
 echo >&2 "Adding RTC dtoverlay if needed..."
@@ -352,6 +344,14 @@ then
 	echo "dtoverlay=i2c-rtc,ds3231" | sudo tee --append $CONFIG_ 1>/dev/null
 fi
 echo >&2 "Done."
+
+####### Install nexus-updater
+NexusLocalRepoUpdate nexus-updater $NEXUS_UPDATER_GIT_URL
+command -v nexus-updater.sh >/dev/null || Die "Nexus Updater installation failed."
+
+####### AUDIO Setup ###########
+####### Install nexus-audio
+nexus-updater.sh nexus-audio $NEXUS_AUDIO_GIT_URL
 
 ####### Install fldigi, flmsg, flrig, direwolf, nexus-rmsgw
 nexus-updater.sh fldigi,flmsg,flrig,flamp,direwolf
@@ -401,7 +401,6 @@ WHAT="sleep 5 && /usr/local/sbin/initialize-pi.sh"
 JOB="$WHEN $WHAT"
 cat <(fgrep -i -v "$WHAT" <(sudo crontab -u $WHO -l)) <(echo "$JOB") | sudo crontab -u $WHO -
 
-
 ####### Install nexus-rmsgw
 nexus-updater.sh nexus-rmsgw
 
@@ -444,7 +443,6 @@ FLMSG_WEB_PORT[right]=8090
 declare -A REVERSEAUDIO
 REVERSEAUDIO[left]=0
 REVERSEAUDIO[right]=1
-
 
 for SIDE in left right
 do
