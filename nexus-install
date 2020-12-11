@@ -337,6 +337,7 @@ fi
 
 ####### Real Time Clock #########
 # Check for RTC dtoverlay
+CONFIG_="/boot/config.txt"
 echo >&2 "Adding RTC dtoverlay if needed..."
 if ! grep -q "^dtoverlay=i2c-rtc,ds3231" $CONFIG_
 then
