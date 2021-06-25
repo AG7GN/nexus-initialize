@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.3
+#-    version         ${SCRIPT_NAME} 2.1.4
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -365,7 +365,7 @@ nexus-updater.sh nexus-audio $NEXUS_AUDIO_GIT_URL
 nexus-updater.sh fldigi,flmsg,flrig,flamp,direwolf
 
 ####### Install nexus-utilities and set up desktops
-nexus-updater.sh nexus-utilities
+nexus-updater.sh nexus-utilities,nexus-backup-restore
 for DESKTOP in /usr/local/share/applications/*.template
 do
 	sed -e "s/_LEFT_RADIO_/left radio/g" \

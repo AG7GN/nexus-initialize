@@ -264,15 +264,15 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 		git clone https://github.com/AG7GN/nexus-initialize
 		nexus-initialize/nexus-install -f
 	
-	The `nexus-install` command will delete `$HOME/DO_NOT_DELETE_THIS_FILE`, which will cause initialize-pi.sh to run at next boot. `initialize-pi.sh` will clear out user's home folder and other personal data from some apps.
+The `nexus-install` command will delete `$HOME/DO_NOT_DELETE_THIS_FILE`, which will cause initialize-pi.sh to run at next boot. `initialize-pi.sh` will clear out user's home folder and other personal data from some apps.
 	
 1) Click __Raspberry > Preferences > Main Menu editor__ and arrange menu to suit.
 
 1) Try connecting to the Pi from a VNC client
 
-	- Should be able to go to `nexus.local`
+- Should be able to go to `nexus.local`
 	
-	- Once connected, run __Raspberry > Preferences > Screensaver__, then select __Disable Screen Saver__ in the dropdown.
+- Once connected, run __Raspberry > Preferences > Screensaver__, then select __Disable Screen Saver__ in the dropdown.
 	- __File > Quit__ to exit __Screensaver__
 	
 1) Set resolution from VNC
@@ -284,16 +284,16 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 	
 1) Reboot and test VNC again.
 
-1) Open `alsamixer` and verify that the Fe-Pi capture is set to __LINE_IN__ and that the capture attenuation is on (not muted) and that line out is not muted and set to 100. as shown:
-
-![alsamixer settings for fe-pi](img/fe-pi-settings.png)
-
-The settings offscreen to the right are at default values.  Note that the values shown are just a starting point. Some fine tuning may be needed.
+1) Open `alsamixer` and verify that the Fe-Pi capture is set to __LINE_IN__ and that the capture attenuation is on (not muted) and that line out is not muted and set to 100. The settings offscreen to the right are at default values.  Note that the values shown are just a starting point. Some fine tuning may be needed.
 
 1) Set version (update date as needed)
 
 		echo "NEXUS_VERSION=20201209" | sudo tee /boot/nexus.txt 1>/dev/null
 		
+1) Use __Raspberry > Preferences > Main Menu Editor__ to arrange the menus.
+
 1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE` and shutdown (don't reboot).
+
+
 
 Image is now ready for distribution
