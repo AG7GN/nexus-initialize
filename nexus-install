@@ -326,7 +326,7 @@ shift $((${OPTIND} - 1)) ## shift options
 #  MAIN SCRIPT
 #============================
 
-[ -z $DISPLAY ] || Die "${SCRIPT_NAME}: Must be run from lxterminal or xterm in a GUI, not via SSH or from the console."
+[ -z $DISPLAY ] && Die "${SCRIPT_NAME}: Must be run from lxterminal or xterm in a GUI, not via SSH or from the console."
 
 if [[ $RUN_IT == $FALSE ]]
 then
