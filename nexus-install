@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.1
+#-    version         ${SCRIPT_NAME} 2.1.2
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -45,6 +45,7 @@
 #================================================================
 #  HISTORY
 #     20201120 : Steve Magnuson : Script creation
+#     20210623 : Steve Magnuson : Added check to ensure running from X (GUI)
 # 
 #================================================================
 #  DEBUG OPTION
@@ -292,7 +293,8 @@ do
 	fi
 
 	# Options followed by another option instead of argument
-	if [[ "x${OPTION}" != "x:" ]] && [[ "x${OPTION}" != "x?" ]] && [[ "${OPTARG}" = -* ]]; then 
+	if [[ "x${OPTION}" != "x:" ]] && [[ "x${OPTION}" != "x?" ]] && [[ "${OPTARG}" = -* ]]
+	then 
 		OPTARG="$OPTION" OPTION=":"
 	fi
 
@@ -323,6 +325,8 @@ shift $((${OPTIND} - 1)) ## shift options
 #============================
 #  MAIN SCRIPT
 #============================
+
+[ -z $DISPLAY ] || Die "${SCRIPT_NAME}: Must be run from lxterminal or xterm in a GUI, not via SSH or from the console."
 
 if [[ $RUN_IT == $FALSE ]]
 then

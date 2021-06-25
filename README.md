@@ -127,11 +127,7 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 		" Don't use Ex mode, use Q for formatting
 		map Q gq
 
-		" CTRL-U in insert mode deletes a lot.  Use CTRL-G u to first break undo,
-		" so that you can undo CTRL-U after inserting a line break.
-		ignoremap <C-U> <C-G>u<C-U>
-
-		" In many terminal emulators the mouse works just fine, thus enable it.
+				" In many terminal emulators the mouse works just fine, thus enable it.
 		"if has('mouse')
 		"  set mouse=a
 		"endif
@@ -368,6 +364,8 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 	- Select __1 Display Options__, then __D1 Resolution__, then select __DMT Mode 82__ from the list.
 	- Tab to OK, then exit `raspi-config`.
 	
+
+## __SAVE THE IMAGE NOW AS A NEXUS-CANDIDATE!__
 
 1) Reboot
 
