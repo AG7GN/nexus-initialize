@@ -502,7 +502,7 @@ do
    for WID in $(xdotool search --pid $PID_ 2>/dev/null | sort -r)
    do
    	xdotool windowclose $WID >/dev/null 2>&1
-   	sleep 3
+   	sleep 1
    done
    pkill -SIGTERM flrig
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
