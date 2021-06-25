@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.2
+#-    version         ${SCRIPT_NAME} 2.1.3
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -499,8 +499,11 @@ do
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE &
    PID_=$!
    sleep 2
-   WID=$(xdotool search --pid $PID_ 2>/dev/null)
-   xdotool windowclose $WID >/dev/null 2>&1
+   for WID in $(xdotool search --pid $PID_ 2>/dev/null | sort -r)
+   do
+   	xdotool windowclose $WID >/dev/null 2>&1
+   	sleep 3
+   done
    pkill -SIGTERM flrig
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
