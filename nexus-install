@@ -339,6 +339,9 @@ then
 	SafeExit 0
 fi
 
+####### Install .vimrc ##########
+cp -f nexus-initialize/vimrc $HOME/.vimrc
+
 ####### Real Time Clock #########
 # Check for RTC dtoverlay
 CONFIG_="/boot/config.txt"
