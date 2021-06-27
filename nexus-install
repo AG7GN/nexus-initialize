@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.4
+#-    version         ${SCRIPT_NAME} 2.1.5
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -45,7 +45,8 @@
 #================================================================
 #  HISTORY
 #     20201120 : Steve Magnuson : Script creation
-#     20210623 : Steve Magnuson : Added check to ensure running from X (GUI)
+#     20210623 : Steve Magnuson : Add check to ensure running from X (GUI)
+#     20210626 : Steve Magnuson : Add new USE_GPIO_PTT variable to fldigi_def.xml
 # 
 #================================================================
 #  DEBUG OPTION
@@ -416,6 +417,10 @@ nexus-updater.sh nexus-rmsgw
 rm -rf $HOME/.nbems
 rm -rf $HOME/.fltk
 
+declare -A USE_GPIO_PTT
+USE_GPIO_PTT[left]=1
+USE_GPIO_PTT[right]=1
+
 declare -A GPIO_STATE
 GPIO_STATE[left]=8192
 GPIO_STATE[right]=16
@@ -479,6 +484,7 @@ do
    -e "s/<PORTININDEX>.*<\/PORTININDEX>/<PORTININDEX>-1<\/PORTININDEX>/" \
    -e "s/<PORTOUTDEVICE>.*<\/PORTOUTDEVICE>/<PORTOUTDEVICE><\/PORTOUTDEVICE>/" \
    -e "s/<PORTOUTINDEX>.*<\/PORTOUTINDEX>/<PORTOUTINDEX>-1<\/PORTOUTINDEX>/" \
+   -e "s/<USE_GPIO_PTT>.*<\/USE_GPIO_PTT>/<USE_GPIO_PTT>${USE_GPIO_PTT[$SIDE]}<\/USE_GPIO_PTT>/" \
    -e "s/<ENABLE_GPIO>.*<\/ENABLE_GPIO>/<ENABLE_GPIO>${GPIO_STATE[$SIDE]}<\/ENABLE_GPIO>/" \
    -e "s/<GPIO_STATE>.*<\/GPIO_STATE>/<GPIO_STATE>${GPIO_STATE[$SIDE]}<\/GPIO_STATE>/" \
    -e "s/<XMLRPC_PORT>.*<\/XMLRPC_PORT>/<XMLRPC_PORT>${XML_PORT[$SIDE]}<\/XMLRPC_PORT>/" \
