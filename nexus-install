@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.5
+#-    version         ${SCRIPT_NAME} 2.1.6
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -339,6 +339,9 @@ then
 	echo >&2
 	SafeExit 0
 fi
+
+####### Make the documentation directory. Hamlib needs this to exist ######
+sudo mkdir -p /usr/local/share/doc
 
 ####### Install .vimrc ##########
 cp -f nexus-initialize/vimrc $HOME/.vimrc
