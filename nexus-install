@@ -424,7 +424,7 @@ cat <(fgrep -i -v "$WHAT" <(sudo crontab -u $WHO -l)) <(echo "$JOB") | sudo cron
 nexus-updater.sh nexus-rmsgw
 
 ####### Set up desktop background
-edit-desktop.sh -c "$MYCALL"
+#edit-desktop.sh -c "$MYCALL"
 
 ####### Set up Fldigi to use PulseAudio with Fe-Pi sound card.
 rm -rf $HOME/.nbems
