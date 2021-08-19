@@ -500,8 +500,10 @@ do
    -e "s/<FSQSHOWMONITOR>.*<\/FSQSHOWMONITOR>/<FSQSHOWMONITOR>1<\/FSQSHOWMONITOR>/" \
    -e "s/<OPEN_FLMSG_PRINT>.*<\/OPEN_FLMSG_PRINT>/<OPEN_FLMSG_PRINT>0<\/OPEN_FLMSG_PRINT>/" \
    -e "s|<FLMSG_PATHNAME>.*</FLMSG_PATHNAME>|<FLMSG_PATHNAME>$FLMSG_STRING</FLMSG_PATHNAME>|" \
-  	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/"  \
-   -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
+  	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/"  
+   $HOME/.fldigi-$SIDE/fldigi_def.xml 
+	sed -i -e
+"s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
    -e "s/<THORSECTEXT>.*<\/THORSECTEXT>/<THORSECTEXT>A <\/THORSECTEXT>/" \   
    -e "s/<SECONDARYTEXT>.*<\/SECONDARYTEXT>/<SECONDARYTEXT>A <\/SECONDARYTEXT>/" \   
    -e "s/<MYCALL>.*<\/MYCALL>/<MYCALL>N0CALL<\/MYCALL>/" \   
@@ -530,14 +532,15 @@ do
 	echo >&2 "Initializing Flmsg $SIDE"
    flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_=$!
-   sleep 2
+   sleep 3
    WID=$(xdotool search --pid $PID_ 2>/dev/null)
    xdotool windowclose $WID >/dev/null 2>&1
-   sleep 1
+   sleep 2
    for WID in $(xdotool search --name "flmsg")
    do
       xdotool windowclose $WID >/dev/null 2>&1
    done
+   sleep 2
    WaitFor $HOME/.nbems-$SIDE/FLMSG.prefs || Die "$HOME/.nbems-$SIDE/FLMSG.prefs never created."
 	pkill -SIGTERM flmsg
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
