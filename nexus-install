@@ -33,7 +33,7 @@
 #%      
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.7
+#-    version         ${SCRIPT_NAME} 2.1.8
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -422,6 +422,9 @@ cat <(fgrep -i -v "$WHAT" <(sudo crontab -u $WHO -l)) <(echo "$JOB") | sudo cron
 
 ####### Install nexus-rmsgw
 nexus-updater.sh nexus-rmsgw
+
+####### Set up desktop background
+edit-desktop.sh -c "$MYCALL"
 
 ####### Set up Fldigi to use PulseAudio with Fe-Pi sound card.
 rm -rf $HOME/.nbems
