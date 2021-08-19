@@ -37,7 +37,7 @@
 #%    
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.6
+#-    version         ${SCRIPT_NAME} 2.1.7
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -502,6 +502,11 @@ do
    -e "s|<FLMSG_PATHNAME>.*</FLMSG_PATHNAME>|<FLMSG_PATHNAME>$FLMSG_STRING</FLMSG_PATHNAME>|" \
   	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/" \
    -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
+   -e "s/<THORSECTEXT>.*<\/THORSECTEXT>/<THORSECTEXT>A <\/THORSECTEXT>/" \   
+   -e "s/<SECONDARYTEXT>.*<\/SECONDARYTEXT>/<SECONDARYTEXT>A <\/SECONDARYTEXT>/" \   
+   -e "s/<MYCALL>.*<\/MYCALL>/<MYCALL>N0CALL<\/MYCALL>/" \   
+   -e "s/<MYNAME>.*<\/MYNAME>/<MYNAME>No One<\/MYNAME>/" \   
+   -e "s/<OPERCALL>.*<\/OPERCALL>/<OPERCALL>N0CALL<\/OPERCALL>/" \   
    $HOME/.fldigi-$SIDE/fldigi_def.xml 
 	echo >&2 "Done."
 	

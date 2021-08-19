@@ -260,6 +260,7 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 
 		sudo mkdir -p /usr/local/src/nexus
 		sudo chown $USER:$USER /usr/local/src/nexus
+		sudo mkdir -p /usr/local/share/doc
 		cd /usr/local/src/nexus
 		git clone https://github.com/AG7GN/nexus-initialize
 		nexus-initialize/nexus-install -f
