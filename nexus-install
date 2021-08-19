@@ -13,28 +13,24 @@
 #%    -h, --help              Print this help
 #%    -v, --version           Print script information
 #%    -f, --force             Run script without printing warning message.
+#%    -c, --call					Optional call sign for Fldigi configuration
+#%                            Default: N0CALL
+#%    -n, --name              Optional operator name for Fldigi configuration
+#%                            Default: "No Name"
 #% 
 #% COMMANDS 
-#%    APP(s)                  Zero or more applications (comma separated) to install,
-#%                            or udpate if already installed.
-#%                            If no APPs are supplied, the script runs in GUI
-#%                            mode and presents a user interface in which the user
-#%                            can select one or more APPs for installation or
-#%                            upgrade.
+#%    
 #%                                
 #% EXAMPLES
-#%    Run the script in GUI mode and run the self-checker:
+#%    Run the script without printing warning message:
 #%
-#%      ${SCRIPT_NAME} -s
+#%      ${SCRIPT_NAME} -f
 #%
-#%    Run the script from the command line and install or update fldigi and flmsg:
+#%    Run the script without printing warning message and set call and name to
+#%    non-default values:
 #%
-#%      ${SCRIPT_NAME} fldigi,flmsg  
-#%    
-#%    Run the script from the command line and force a reinstall of fldigi and flmsg:
-#%
-#%      ${SCRIPT_NAME} -f fldigi,flmsg  
-#%    
+#%      ${SCRIPT_NAME} -f -c AG7GN -n "Steve M"
+#%      
 #================================================================
 #- IMPLEMENTATION
 #-    version         ${SCRIPT_NAME} 2.1.7
@@ -252,11 +248,13 @@ RUN_IT=$FALSE
 Optnum=$#
   
 #== set short options ==#
-SCRIPT_OPTS=':fhv-:'
+SCRIPT_OPTS=':c:fhn:v-:'
 
 #== set long options associated with short one ==#
 typeset -A ARRAY_OPTS
 ARRAY_OPTS=(
+	[call]=c
+	[name]=n
 	[help]=h
 	[version]=v
 	[string]=s
@@ -301,10 +299,16 @@ do
 
 	# Finally, manage options
 	case "$OPTION" in
+	   c)
+	      MYCALL="$OPTARG"
+	      ;;
 		h) 
 			ScriptInfo full
 			SafeExit 0
 			;;
+	   n)
+	      MYNAME="$OPTARG"
+	      ;;
 		v) 
 			ScriptInfo version
 			SafeExit 0
@@ -326,6 +330,9 @@ shift $((${OPTIND} - 1)) ## shift options
 #============================
 #  MAIN SCRIPT
 #============================
+
+[[ -z $MYCALL ]] && MYCALL="N0CALL"
+[[ -z $MYNAME ]] && MYNAME="No One"
 
 [ -z $DISPLAY ] && Die "${SCRIPT_NAME}: Must be run from lxterminal or xterm in a GUI, not via SSH or from the console."
 
@@ -498,19 +505,14 @@ do
    -e "s/<XMLLOG_PORT>.*<\/XMLLOG_PORT>/XMLLOG_PORT>${XMLLOG_PORT[$SIDE]}<\/XMLLOG_PORT>/" \
    -e "s/<FSQLOWERCASE>.*<\/FSQLOWERCASE>/<FSQLOWERCASE>1<\/FSQLOWERCASE>/" \
    -e "s/<FSQSHOWMONITOR>.*<\/FSQSHOWMONITOR>/<FSQSHOWMONITOR>1<\/FSQSHOWMONITOR>/" \
-   -e "s/<OPEN_FLMSG_PRINT>.*<\/OPEN_FLMSG_PRINT>/<OPEN_FLMSG_PRINT>0<\/OPEN_FLMSG_PRINT>/" \
    -e "s|<FLMSG_PATHNAME>.*</FLMSG_PATHNAME>|<FLMSG_PATHNAME>$FLMSG_STRING</FLMSG_PATHNAME>|" \
-  	-e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/"  
+   -e "s/<REVERSEAUDIO>.*<\/REVERSEAUDIO>/<REVERSEAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSEAUDIO>/" \
+   -e "s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
+   -e "s/<MYCALL>.*<\/MYCALL>/<MYCALL>$MYCALL<\/MYCALL>/" \
+   -e "s/<MYNAME>.*<\/MYNAME>/<MYNAME>$MYNAME<\/MYNAME>/" \
+   -e "s/<OPERCALL>.*<\/OPERCALL>/<OPERCALL>$MYCALL<\/OPERCALL>/" \
    $HOME/.fldigi-$SIDE/fldigi_def.xml 
-	sed -i -e
-"s/<REVERSERXAUDIO>.*<\/REVERSERXAUDIO>/<REVERSERXAUDIO>${REVERSEAUDIO[$SIDE]}<\/REVERSERXAUDIO>/" \
-   -e "s/<THORSECTEXT>.*<\/THORSECTEXT>/<THORSECTEXT>A <\/THORSECTEXT>/" \   
-   -e "s/<SECONDARYTEXT>.*<\/SECONDARYTEXT>/<SECONDARYTEXT>A <\/SECONDARYTEXT>/" \   
-   -e "s/<MYCALL>.*<\/MYCALL>/<MYCALL>N0CALL<\/MYCALL>/" \   
-   -e "s/<MYNAME>.*<\/MYNAME>/<MYNAME>No One<\/MYNAME>/" \   
-   -e "s/<OPERCALL>.*<\/OPERCALL>/<OPERCALL>N0CALL<\/OPERCALL>/" \   
-   $HOME/.fldigi-$SIDE/fldigi_def.xml 
-	echo >&2 "Done."
+	echo >&2 "Fldigi $SIDE Done."
 	
 	# Flrig
 	rm -rf $HOME/.flrig-$SIDE
@@ -518,41 +520,44 @@ do
 	flrig --debug-level 0 --config-dir $HOME/.flrig-$SIDE &
    PID_=$!
    sleep 2
-   for WID in $(xdotool search --pid $PID_ 2>/dev/null | sort -r)
+   FLRIG_WINDOWS="$(xdotool search --pid $PID_ 2>/dev/null | sort -r | xargs)"
+   for WID in $FLRIG_WINDOWS
    do
    	xdotool windowclose $WID >/dev/null 2>&1
-   	sleep 1
    done
    pkill -SIGTERM flrig
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
-	echo >&2 "Done."
+	echo >&2 "Flrig $SIDE Done."
 	
 	# Flmsg
 	echo >&2 "Initializing Flmsg $SIDE"
    flmsg --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
    PID_=$!
-   sleep 3
+   sleep 4
    WID=$(xdotool search --pid $PID_ 2>/dev/null)
    xdotool windowclose $WID >/dev/null 2>&1
-   sleep 2
+   sleep 1
    for WID in $(xdotool search --name "flmsg")
    do
       xdotool windowclose $WID >/dev/null 2>&1
+	   sleep 2
    done
-   sleep 2
    WaitFor $HOME/.nbems-$SIDE/FLMSG.prefs || Die "$HOME/.nbems-$SIDE/FLMSG.prefs never created."
 	pkill -SIGTERM flmsg
-   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" $HOME/.nbems-$SIDE/FLMSG.prefs
-	echo >&2 "Done."
+   sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
+          -e "s/^mycall:.*/mycall:$MYCALL/" \
+          -e "s/^myname:.*/myname:$MYNAME/" \
+   $HOME/.nbems-$SIDE/FLMSG.prefs
+	echo >&2 "Flmsg $SIDE Done."
 
 	# Flamp
 	echo >&2 "Initializing Flamp $SIDE"
    fldigi --config-dir $HOME/.fldigi-$SIDE --flmsg-dir $HOME/.nbems-$SIDE >/dev/null 2>&1 &
-   sleep 5
+   sleep 7
    flamp --config-dir $HOME/.nbems-$SIDE --xmlrpc-server-port ${XML_PORT[$SIDE]} >/dev/null 2>&1 &
    PID_=$!
-   sleep 1
+   sleep 3
    for WID in $(xdotool search --pid $PID_ | sort -r)
    do
 	   xdotool windowclose $WID >/dev/null 2>&1
@@ -563,15 +568,17 @@ do
    WaitFor $HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs || Die "$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs never created."
    sed -i -e "s/^xmlrpc_port:.*/xmlrpc_port:${XML_PORT[$SIDE]}/" \
    		-e "s/^socket_port:.*/xmlrpc_port:${ARQ_PORT[$SIDE]}/" \
-   		$HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
-	echo >&2 "Done."
+         -e "s/^mycall:.*/mycall:$MYCALL/" \
+         -e "s/^myinfo:.*/myinfo:$MYNAME/" \
+   $HOME/.nbems-$SIDE/FLAMP/FLAMP.prefs
+	echo >&2 "Flamp $SIDE Done."
 	
 	# Flarq
 	echo >&2 "Initializing Flarq $SIDE"
    sudo sed -i -e "s/arq-server-port.*/arq-server-port ${ARQ_PORT[$SIDE]}/" \
    		/usr/local/share/applications/flarq-$SIDE.desktop \
    		/usr/local/share/applications/flarq-$SIDE.template
-	echo >&2 "Done."
+	echo >&2 "Flarq $SIDE Done."
 	
 done
 
