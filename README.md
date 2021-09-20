@@ -223,21 +223,22 @@ Many of these OS preparation tips are from David Ranch's excellent [HOWTO](http:
 
 1) Enable Hardware Watchdog
 
-	- Install `watchdog`:
+- Install `watchdog`:
 	
-			sudo apt-get install watchdog
+		sudo apt-get install watchdog
 		
 		
-	- Edit `/etc/watchdog.conf` and uncomment these lines:
+- Edit `/etc/watchdog.conf` and uncomment or add these lines:
 	
-			max-load-1             = 24
-			max-load-5             = 18
-			watchdog-device        = /dev/watchdog
+		max-load-1             = 24
+		max-load-5             = 18
+		watchdog-device        = /dev/watchdog
+		watchdog-timeout		  = 15	
 
-	- Enable and start `watchdog`:
+- Enable and start `watchdog`:
 	
-			sudo systemctl enable watchdog
-			sudo systemctl start watchdog.service
+		sudo systemctl enable watchdog
+		sudo systemctl start watchdog.service
 
 1) Changes to `/boot/config.txt`
 
