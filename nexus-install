@@ -33,7 +33,7 @@
 #%      
 #================================================================
 #- IMPLEMENTATION
-#-    version         ${SCRIPT_NAME} 2.1.9
+#-    version         ${SCRIPT_NAME} 2.1.10
 #-    author          Steve Magnuson, AG7GN
 #-    license         CC-BY-SA Creative Commons License
 #-    script_id       0
@@ -531,7 +531,7 @@ do
    pkill -SIGTERM flrig
    sed -i -e "s/^xmlport:.*/xmlport:${FLRIG_PORT[$SIDE]}/" $HOME/.flrig-$SIDE/NONE.prefs
    echo "xmlport:${FLRIG_PORT[$SIDE]}" >> $HOME/.flrig-$SIDE/flrig.prefs
-   for S in $(grep -ho "^[a-z].*trace" *.prefs | sort | uniq)
+   for S in $(grep -ho "^[a-z].*trace" $HOME/.flrig-$SIDE/*.prefs | sort | uniq)
    do
    	sed -i -e "s/^$S:1/$S:0/" $HOME/.flrig-$SIDE/*.prefs
    done
