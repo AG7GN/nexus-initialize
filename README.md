@@ -294,8 +294,8 @@ The `nexus-install` command will delete `$HOME/DO_NOT_DELETE_THIS_FILE`, which w
 		
 1) Use __Raspberry > Preferences > Main Menu Editor__ to arrange the menus.
 
-1) Remove `$HOME/DO_NOT_DELETE_THIS_FILE` and shutdown (don't reboot).
+1) This should already have been done by `nexus-initialize/nexus-install`, but verify that `$HOME/DO_NOT_DELETE_THIS_FILE` has been deleted.
 
+1) Shutdown (don't reboot).
 
-
-Image is now ready for distribution
+1) Create an image from from the microSD card. Image is now ready for distribution
